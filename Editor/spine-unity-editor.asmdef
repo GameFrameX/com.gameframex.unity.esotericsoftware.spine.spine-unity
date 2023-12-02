@@ -1,0 +1,12 @@
+{
+    "name": "spine-unity-editor",
+    "references": [
+        "spine-unity.Runtime"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
