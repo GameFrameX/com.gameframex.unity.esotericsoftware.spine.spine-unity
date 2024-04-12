@@ -19,6 +19,7 @@
 # 改动功能
 
 1. 增加 `link.xml` 的裁剪过滤
+2. 增加 `SpineUnityCroppingHelper` 防裁剪脚本
 
 # Licensing
 
