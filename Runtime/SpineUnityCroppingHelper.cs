@@ -137,7 +137,6 @@ namespace Spine.Unity
             _ = typeof(Spine.Unity.IHasSkeletonRenderer);
             _ = typeof(Spine.Unity.ISkeletonAnimation);
             _ = typeof(Spine.Unity.ISkeletonComponent);
-            _ = typeof(Spine.Unity.MaterialChecks);
             _ = typeof(Spine.Unity.MaterialsTextureLoader);
             _ = typeof(Spine.Unity.MeshGenerator);
             _ = typeof(Spine.Unity.MeshGenerator.Settings);
