@@ -1,5 +1,5 @@
 {
-	"name": "com.alianblank.gameframex.unity.esotericsoftware.spine.spine-unity",
+	"name": "com.gameframex.unity.esotericsoftware.spine.spine-unity",
 	"displayName": "Spine-Unity",
 	"description": "This plugin provides the spine-unity runtime core.",
 	"version": "3.8.0",
