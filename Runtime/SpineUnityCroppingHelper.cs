@@ -8,16 +8,10 @@ namespace Spine.Unity
         [Preserve]
         public void Start()
         {
-            _ = typeof(Spine.Collections.OrderedDictionary<,>);
-            _ = typeof(Spine.Collections.OrderedDictionaryDebugView<,>);
             _ = typeof(Spine.ExposedList<>);
             _ = typeof(Spine.ExposedList<>.Enumerator);
             _ = typeof(Spine.Pool<>);
             _ = typeof(Spine.Pool<>.IPoolable);
-            _ = typeof(Spine.Unity.Deprecated.SlotBlendModes);
-            _ = typeof(Spine.Unity.Deprecated.SlotBlendModes.MaterialTexturePair);
-            _ = typeof(Spine.Unity.Deprecated.SlotBlendModes.MaterialWithRefcount);
-            _ = typeof(Spine.Unity.Deprecated.SlotBlendModes.SlotMaterialTextureTuple);
             _ = typeof(Spine.Unity.DoubleBuffered<>);
             _ = typeof(SharpJson.JsonDecoder);
             _ = typeof(SharpJson.Lexer);
@@ -43,8 +37,6 @@ namespace Spine.Unity
             _ = typeof(Spine.BoneMatrix);
             _ = typeof(Spine.BoundingBoxAttachment);
             _ = typeof(Spine.ClippingAttachment);
-            _ = typeof(Spine.Collections.CollectionExtensions);
-            _ = typeof(Spine.ColorTimeline);
             _ = typeof(Spine.ConstraintData);
             _ = typeof(Spine.CurveTimeline);
             _ = typeof(Spine.DeformTimeline);
@@ -55,7 +47,6 @@ namespace Spine.Unity
             _ = typeof(Spine.EventTimeline);
             _ = typeof(Spine.Format);
             _ = typeof(Spine.IBoneTimeline);
-            _ = typeof(Spine.IHasRendererObject);
             _ = typeof(Spine.IInterpolation);
             _ = typeof(Spine.IkConstraint);
             _ = typeof(Spine.IkConstraintData);
@@ -91,7 +82,6 @@ namespace Spine.Unity
             _ = typeof(Spine.SkeletonClipping);
             _ = typeof(Spine.SkeletonData);
             _ = typeof(Spine.SkeletonJson);
-            _ = typeof(Spine.SkeletonJson.LinkedMesh);
             _ = typeof(Spine.Skin);
             _ = typeof(Spine.Skin.SkinEntry);
             _ = typeof(Spine.Slot);
@@ -102,15 +92,12 @@ namespace Spine.Unity
             _ = typeof(Spine.TextureLoader);
             _ = typeof(Spine.TextureWrap);
             _ = typeof(Spine.Timeline);
-            _ = typeof(Spine.TimelineType);
             _ = typeof(Spine.TrackEntry);
             _ = typeof(Spine.TransformConstraint);
             _ = typeof(Spine.TransformConstraintData);
             _ = typeof(Spine.TransformConstraintTimeline);
-            _ = typeof(Spine.TransformMode);
             _ = typeof(Spine.TranslateTimeline);
             _ = typeof(Spine.Triangulator);
-            _ = typeof(Spine.TwoColorTimeline);
             _ = typeof(Spine.Unity.ActivateBasedOnFlipDirection);
             _ = typeof(Spine.Unity.AnimationReferenceAsset);
             _ = typeof(Spine.Unity.AnimationTools.TimelineExtensions);
@@ -118,7 +105,6 @@ namespace Spine.Unity
             _ = typeof(Spine.Unity.AttachmentTools.AtlasUtilities);
             _ = typeof(Spine.Unity.AttachmentTools.AttachmentCloneExtensions);
             _ = typeof(Spine.Unity.AttachmentTools.AttachmentRegionExtensions);
-            _ = typeof(Spine.Unity.AttachmentTools.SkinUtilities);
             _ = typeof(Spine.Unity.BlendModeMaterials);
             _ = typeof(Spine.Unity.BlendModeMaterials.ReplacementMaterial);
             _ = typeof(Spine.Unity.BlendModeMaterialsAsset);
