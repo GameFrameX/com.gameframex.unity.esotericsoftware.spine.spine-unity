@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.8.3](https://github.com/GameFrameX/com.gameframex.unity.esotericsoftware.spine.spine-unity/tree/3.8.3) (2025-05-31)
+
+[Full Changelog](https://github.com/GameFrameX/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.8.2...3.8.3)
+
 ## [3.8.2](https://github.com/GameFrameX/com.gameframex.unity.esotericsoftware.spine.spine-unity/tree/3.8.2) (2025-05-30)
 
 [Full Changelog](https://github.com/GameFrameX/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.8.1...3.8.2)
