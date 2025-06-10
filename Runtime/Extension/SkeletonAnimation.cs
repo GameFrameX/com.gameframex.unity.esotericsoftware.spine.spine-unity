@@ -11,43 +11,45 @@ namespace Spine.Unity
     public static class SkeletonAnimationExtension
     {
         /// <summary>
-        /// 播放动画
+        /// 播放Spine骨骼动画
         /// </summary>
-        /// <param name="skeletonAnimation"></param>
-        /// <param name="animationName">动画名称</param>
-        /// <param name="loop">是否循环</param>
-        /// <param name="onComplete">完成回调</param>
+        /// <param name="skeletonAnimation">Spine骨骼动画组件</param>
+        /// <param name="animationName">要播放的动画名称</param>
+        /// <param name="loop">是否循环播放动画，true为循环播放，false为播放一次</param>
+        /// <param name="onComplete">动画播放完成时的回调函数，仅在非循环模式下生效</param>
         public static void PlayAnimation(this SkeletonAnimation skeletonAnimation, string animationName, bool loop = false, Action onComplete = null)
         {
-            void StateOnComplete(TrackEntry trackEntry)
-            {
-                trackEntry.Complete -= StateOnComplete;
-                onComplete?.Invoke();
-            }
-
-            skeletonAnimation.state.Complete -= StateOnComplete;
-            skeletonAnimation.state.Complete += StateOnComplete;
-            skeletonAnimation.state.SetAnimation(0, animationName, loop);
+            PlayAnimation(skeletonAnimation, animationName, 0, loop, onComplete);
         }
 
         /// <summary>
-        /// 播放动画
+        /// 在指定轨道上播放Spine骨骼动画
         /// </summary>
-        /// <param name="skeletonAnimation"></param>
-        /// <param name="animationName">动画名称</param>
-        /// <param name="trackIndex">动画轨道</param>
-        /// <param name="loop">是否循环</param>
-        /// <param name="onComplete">完成回调</param>
+        /// <param name="skeletonAnimation">Spine骨骼动画组件</param>
+        /// <param name="animationName">要播放的动画名称</param>
+        /// <param name="trackIndex">动画轨道索引，用于混合多个动画，默认为0</param>
+        /// <param name="loop">是否循环播放动画，true为循环播放，false为播放一次</param>
+        /// <param name="onComplete">动画播放完成时的回调函数，仅在非循环模式下生效</param>
         public static void PlayAnimation(this SkeletonAnimation skeletonAnimation, string animationName, int trackIndex = 0, bool loop = false, Action onComplete = null)
         {
+            // 定义动画完成时的回调处理函数
             void StateOnComplete(TrackEntry trackEntry)
             {
+                // 移除事件监听，避免重复触发
                 trackEntry.Complete -= StateOnComplete;
+                // 调用用户传入的完成回调
                 onComplete?.Invoke();
             }
 
+            // 确保移除之前可能存在的完成事件监听
             skeletonAnimation.state.Complete -= StateOnComplete;
-            skeletonAnimation.state.Complete += StateOnComplete;
+            // 非循环模式下添加完成事件监听
+            if (!loop)
+            {
+                skeletonAnimation.state.Complete += StateOnComplete;
+            }
+
+            // 设置并播放指定轨道上的动画
             skeletonAnimation.state.SetAnimation(trackIndex, animationName, loop);
         }
     }
