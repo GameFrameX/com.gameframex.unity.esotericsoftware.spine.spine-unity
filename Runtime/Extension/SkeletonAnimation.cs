@@ -5,6 +5,7 @@
 // 不得利用本项目从事危害国家安全、扰乱社会秩序、侵犯他人合法权益等法律法规禁止的活动！任何基于本项目二次开发而产生的一切法律纠纷和责任，我们不承担任何责任！
 
 using System;
+using UnityEngine;
 
 namespace Spine.Unity
 {
@@ -41,16 +42,23 @@ namespace Spine.Unity
                 onComplete?.Invoke();
             }
 
-            // 确保移除之前可能存在的完成事件监听
-            skeletonAnimation.state.Complete -= StateOnComplete;
-            // 非循环模式下添加完成事件监听
-            if (!loop)
+            if (skeletonAnimation.AnimationState != null)
             {
-                skeletonAnimation.state.Complete += StateOnComplete;
-            }
+                // 确保移除之前可能存在的完成事件监听
+                skeletonAnimation.AnimationState.Complete -= StateOnComplete;
+                // 非循环模式下添加完成事件监听
+                if (!loop)
+                {
+                    skeletonAnimation.AnimationState.Complete += StateOnComplete;
+                }
 
-            // 设置并播放指定轨道上的动画
-            skeletonAnimation.state.SetAnimation(trackIndex, animationName, loop);
+                // 设置并播放指定轨道上的动画
+                skeletonAnimation.AnimationState.SetAnimation(trackIndex, animationName, loop);
+            }
+            else
+            {
+                Debug.LogError("AnimationState Is null");
+            }
         }
     }
 }
