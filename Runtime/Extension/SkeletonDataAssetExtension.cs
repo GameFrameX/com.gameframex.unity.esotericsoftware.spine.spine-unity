@@ -55,15 +55,18 @@ namespace Spine.Unity
             // 将 GameObject 名称同步为资源名称，方便调试
             gameObject.name = skeletonDataAsset.name;
             var component = gameObject.GetComponent<SkeletonAnimation>();
+
             if (component == null)
             {
                 // 不存在则自动添加新组件
                 return SkeletonRenderer.AddSpineComponent<SkeletonAnimation>(gameObject, skeletonDataAsset, quiet);
             }
 
+            component.ClearState();
             // 已存在则直接替换骨骼数据并刷新
             component.skeletonDataAsset = skeletonDataAsset;
-            skeletonDataAsset.GetSkeletonData(false); // 强制同步数据
+            component.Initialize(true, true);
+            skeletonDataAsset.GetSkeletonData(true); // 强制同步数据
             OnChangeSpine(component, animationName, isLoop);
             return component;
         }
@@ -114,6 +117,8 @@ namespace Spine.Unity
                 skeletonAnimation.skeleton.SetSkin(skin);
                 skeletonAnimation.skeleton.SetSlotsToSetupPose(); // 强制刷新到初始姿态
             }
+
+            skeletonAnimation.LateUpdate();
         }
     }
 }
