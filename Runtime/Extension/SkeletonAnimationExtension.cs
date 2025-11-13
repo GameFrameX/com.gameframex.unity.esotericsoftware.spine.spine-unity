@@ -43,6 +43,31 @@ namespace Spine.Unity
             render.sortingOrder = sortingOrder;
         }
 
+
+        /// <summary>
+        /// 检查指定名称的动画是否存在于SkeletonAnimation组件中
+        /// </summary>
+        /// <param name="skeletonAnimation">SkeletonAnimation组件</param>
+        /// <param name="animationName">要检查的动画名称</param>
+        /// <returns>如果动画存在则返回true，否则返回false</returns>
+        public static bool HasAnimation(this SkeletonAnimation skeletonAnimation, string animationName)
+        {
+            var skeletonData = skeletonAnimation.Skeleton.Data;
+            var animation = skeletonData.FindAnimation(animationName);
+            return animation != null;
+        }
+
+        /// <summary>
+        /// 获取当前播放的动画名称
+        /// </summary>
+        /// <param name="skeletonAnimation">SkeletonAnimation组件</param>
+        /// <returns>当前播放的动画名称；若未播放任何动画则返回空字符串</returns>
+        public static string GetCurrentAnimationName(this SkeletonAnimation skeletonAnimation)
+        {
+            var currentEntry = skeletonAnimation.AnimationState.GetCurrent(0);
+            return currentEntry == null ? string.Empty : currentEntry.Animation.Name;
+        }
+
         /// <summary>
         /// 播放Spine骨骼动画
         /// </summary>
