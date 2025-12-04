@@ -29,28 +29,41 @@
 
 using System;
 
-namespace Spine {
-	/// <summary>Stores the setup pose values for an Event.</summary>
-	public class EventData {
-		internal string name;
+namespace Spine
+{
+    /// <summary>Stores the setup pose values for an Event.</summary>
+    [UnityEngine.Scripting.Preserve]
+    public class EventData
+    {
+        internal string name;
 
-		/// <summary>The name of the event, which is unique across all events in the skeleton.</summary>
-		public string Name { get { return name; } }
-		public int Int { get; set; }
-		public float Float { get; set; }
-		public string @String { get; set; }
+        /// <summary>The name of the event, which is unique across all events in the skeleton.</summary>
+        [UnityEngine.Scripting.Preserve]
+        public string Name
+        {
+            get { return name; }
+        }
 
-		public string AudioPath { get; set; }
-		public float Volume { get; set; }
-		public float Balance { get; set; }
+        [UnityEngine.Scripting.Preserve] public int Int { get; set; }
+        [UnityEngine.Scripting.Preserve] public float Float { get; set; }
+        [UnityEngine.Scripting.Preserve] public string @String { get; set; }
 
-		public EventData (string name) {
-			if (name == null) throw new ArgumentNullException("name", "name cannot be null.");
-			this.name = name;
-		}
+        [UnityEngine.Scripting.Preserve] public string AudioPath { get; set; }
+        [UnityEngine.Scripting.Preserve] public float Volume { get; set; }
+        [UnityEngine.Scripting.Preserve] public float Balance { get; set; }
 
-		override public string ToString () {
-			return Name;
-		}
-	}
+        [UnityEngine.Scripting.Preserve]
+        public EventData(string name)
+        {
+            if (name == null) throw new ArgumentNullException("name", "name cannot be null.");
+            this.name = name;
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        override
+            public string ToString()
+        {
+            return Name;
+        }
+    }
 }

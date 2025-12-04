@@ -29,20 +29,32 @@
 
 using System;
 
-namespace Spine {
-	public class ClippingAttachment : VertexAttachment {
-		internal SlotData endSlot;
+namespace Spine
+{
+    [UnityEngine.Scripting.Preserve]
+    public class ClippingAttachment : VertexAttachment
+    {
+        internal SlotData endSlot;
 
-		public SlotData EndSlot { get { return endSlot; } set { endSlot = value; } }
+        [UnityEngine.Scripting.Preserve]
+        public SlotData EndSlot
+        {
+            get { return endSlot; }
+            set { endSlot = value; }
+        }
 
-		public ClippingAttachment(string name) : base(name) {
-		}
+        [UnityEngine.Scripting.Preserve]
+        public ClippingAttachment(string name) : base(name)
+        {
+        }
 
-		public override Attachment Copy () {
-			ClippingAttachment copy = new ClippingAttachment(this.Name);
-			CopyTo(copy);
-			copy.endSlot = endSlot;
-			return copy;
-		}
-	}
+        [UnityEngine.Scripting.Preserve]
+        public override Attachment Copy()
+        {
+            ClippingAttachment copy = new ClippingAttachment(this.Name);
+            CopyTo(copy);
+            copy.endSlot = endSlot;
+            return copy;
+        }
+    }
 }

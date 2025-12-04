@@ -28,6 +28,7 @@
  *****************************************************************************/
 
 // Not for optimization. Do not disable.
+
 #define SPINE_TRIANGLECHECK // Avoid calling SetTriangles at the cost of checking for mesh differences (vertex counts, memberwise attachment list compare) every frame.
 //#define SPINE_DEBUG
 
@@ -35,144 +36,161 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-namespace Spine.Unity {
-	/// <summary>Instructions used by a SkeletonRenderer to render a mesh.</summary>
-	public class SkeletonRendererInstruction {
-		public readonly ExposedList<SubmeshInstruction> submeshInstructions = new ExposedList<SubmeshInstruction>();
+namespace Spine.Unity
+{
+    /// <summary>Instructions used by a SkeletonRenderer to render a mesh.</summary>
+    [UnityEngine.Scripting.Preserve]
+    public class SkeletonRendererInstruction
+    {
+        [UnityEngine.Scripting.Preserve] public readonly ExposedList<SubmeshInstruction> submeshInstructions = new ExposedList<SubmeshInstruction>();
 
-		public bool immutableTriangles;
-		#if SPINE_TRIANGLECHECK
-		public bool hasActiveClipping;
-		public int rawVertexCount = -1;
-		public readonly ExposedList<Attachment> attachments = new ExposedList<Attachment>();
-		#endif
+        [UnityEngine.Scripting.Preserve] public bool immutableTriangles;
+#if SPINE_TRIANGLECHECK
+        [UnityEngine.Scripting.Preserve] public bool hasActiveClipping;
+        [UnityEngine.Scripting.Preserve] public int rawVertexCount = -1;
+        [UnityEngine.Scripting.Preserve] public readonly ExposedList<Attachment> attachments = new ExposedList<Attachment>();
+#endif
 
-		public void Clear () {
-			#if SPINE_TRIANGLECHECK
-			this.attachments.Clear(false);
-			rawVertexCount = -1;
-			hasActiveClipping = false;
-			#endif
-			this.submeshInstructions.Clear(false);
-		}
+        [UnityEngine.Scripting.Preserve]
+        public void Clear()
+        {
+#if SPINE_TRIANGLECHECK
+            this.attachments.Clear(false);
+            rawVertexCount = -1;
+            hasActiveClipping = false;
+#endif
+            this.submeshInstructions.Clear(false);
+        }
 
-		public void Dispose () {
-			attachments.Clear(true);
-		}
+        [UnityEngine.Scripting.Preserve]
+        public void Dispose()
+        {
+            attachments.Clear(true);
+        }
 
-		public void SetWithSubset (ExposedList<SubmeshInstruction> instructions, int startSubmesh, int endSubmesh) {
-			#if SPINE_TRIANGLECHECK
-			int runningVertexCount = 0;
-			#endif
+        [UnityEngine.Scripting.Preserve]
+        public void SetWithSubset(ExposedList<SubmeshInstruction> instructions, int startSubmesh, int endSubmesh)
+        {
+#if SPINE_TRIANGLECHECK
+            int runningVertexCount = 0;
+#endif
 
-			var submeshes = this.submeshInstructions;
-			submeshes.Clear(false);
-			int submeshCount = endSubmesh - startSubmesh;
-			submeshes.Resize(submeshCount);
-			var submeshesItems = submeshes.Items;
-			var instructionsItems = instructions.Items;
-			for (int i = 0; i < submeshCount; i++) {
-				var instruction = instructionsItems[startSubmesh + i];
-				submeshesItems[i] = instruction;
-				#if SPINE_TRIANGLECHECK
-				this.hasActiveClipping |= instruction.hasClipping;
-				submeshesItems[i].rawFirstVertexIndex = runningVertexCount; // Ensure current instructions have correct cached values.
-				runningVertexCount += instruction.rawVertexCount; // vertexCount will also be used for the rest of this method.
-				#endif
-			}
-			#if SPINE_TRIANGLECHECK
-			this.rawVertexCount = runningVertexCount;
+            var submeshes = this.submeshInstructions;
+            submeshes.Clear(false);
+            int submeshCount = endSubmesh - startSubmesh;
+            submeshes.Resize(submeshCount);
+            var submeshesItems = submeshes.Items;
+            var instructionsItems = instructions.Items;
+            for (int i = 0; i < submeshCount; i++)
+            {
+                var instruction = instructionsItems[startSubmesh + i];
+                submeshesItems[i] = instruction;
+#if SPINE_TRIANGLECHECK
+                this.hasActiveClipping |= instruction.hasClipping;
+                submeshesItems[i].rawFirstVertexIndex = runningVertexCount; // Ensure current instructions have correct cached values.
+                runningVertexCount += instruction.rawVertexCount; // vertexCount will also be used for the rest of this method.
+#endif
+            }
+#if SPINE_TRIANGLECHECK
+            this.rawVertexCount = runningVertexCount;
 
-			// assumption: instructions are contiguous. start and end are valid within instructions.
+            // assumption: instructions are contiguous. start and end are valid within instructions.
 
-			int startSlot = instructionsItems[startSubmesh].startSlot;
-			int endSlot = instructionsItems[endSubmesh - 1].endSlot;
-			attachments.Clear(false);
-			int attachmentCount = endSlot - startSlot;
-			attachments.Resize(attachmentCount);
-			var attachmentsItems = attachments.Items;
+            int startSlot = instructionsItems[startSubmesh].startSlot;
+            int endSlot = instructionsItems[endSubmesh - 1].endSlot;
+            attachments.Clear(false);
+            int attachmentCount = endSlot - startSlot;
+            attachments.Resize(attachmentCount);
+            var attachmentsItems = attachments.Items;
 
-			var drawOrderItems = instructionsItems[0].skeleton.drawOrder.Items;
-			for (int i = 0; i < attachmentCount; i++) {
-				Slot slot = drawOrderItems[startSlot + i];
-				if (!slot.bone.active) continue;
-				attachmentsItems[i] = slot.attachment;
-			}
+            var drawOrderItems = instructionsItems[0].skeleton.drawOrder.Items;
+            for (int i = 0; i < attachmentCount; i++)
+            {
+                Slot slot = drawOrderItems[startSlot + i];
+                if (!slot.bone.active) continue;
+                attachmentsItems[i] = slot.attachment;
+            }
 
-			#endif
-		}
+#endif
+        }
 
-		public void Set (SkeletonRendererInstruction other) {
-			this.immutableTriangles = other.immutableTriangles;
+        [UnityEngine.Scripting.Preserve]
+        public void Set(SkeletonRendererInstruction other)
+        {
+            this.immutableTriangles = other.immutableTriangles;
 
-			#if SPINE_TRIANGLECHECK
-			this.hasActiveClipping = other.hasActiveClipping;
-			this.rawVertexCount = other.rawVertexCount;
-			this.attachments.Clear(false);
-			this.attachments.EnsureCapacity(other.attachments.Capacity);
-			this.attachments.Count = other.attachments.Count;
-			other.attachments.CopyTo(this.attachments.Items);
-			#endif
+#if SPINE_TRIANGLECHECK
+            this.hasActiveClipping = other.hasActiveClipping;
+            this.rawVertexCount = other.rawVertexCount;
+            this.attachments.Clear(false);
+            this.attachments.EnsureCapacity(other.attachments.Capacity);
+            this.attachments.Count = other.attachments.Count;
+            other.attachments.CopyTo(this.attachments.Items);
+#endif
 
-			this.submeshInstructions.Clear(false);
-			this.submeshInstructions.EnsureCapacity(other.submeshInstructions.Capacity);
-			this.submeshInstructions.Count = other.submeshInstructions.Count;
-			other.submeshInstructions.CopyTo(this.submeshInstructions.Items);
-		}
+            this.submeshInstructions.Clear(false);
+            this.submeshInstructions.EnsureCapacity(other.submeshInstructions.Capacity);
+            this.submeshInstructions.Count = other.submeshInstructions.Count;
+            other.submeshInstructions.CopyTo(this.submeshInstructions.Items);
+        }
 
-		public static bool GeometryNotEqual (SkeletonRendererInstruction a, SkeletonRendererInstruction b) {
-			#if SPINE_TRIANGLECHECK
-			#if UNITY_EDITOR
-			if (!Application.isPlaying)
-			return true;
-			#endif
+        [UnityEngine.Scripting.Preserve]
+        public static bool GeometryNotEqual(SkeletonRendererInstruction a, SkeletonRendererInstruction b)
+        {
+#if SPINE_TRIANGLECHECK
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                return true;
+#endif
 
-			if (a.hasActiveClipping || b.hasActiveClipping) return true; // Triangles are unpredictable when clipping is active.
+            if (a.hasActiveClipping || b.hasActiveClipping) return true; // Triangles are unpredictable when clipping is active.
 
-			// Everything below assumes the raw vertex and triangle counts were used. (ie, no clipping was done)
-			if (a.rawVertexCount != b.rawVertexCount) return true;
+            // Everything below assumes the raw vertex and triangle counts were used. (ie, no clipping was done)
+            if (a.rawVertexCount != b.rawVertexCount) return true;
 
-			if (a.immutableTriangles != b.immutableTriangles) return true;
+            if (a.immutableTriangles != b.immutableTriangles) return true;
 
-			int attachmentCountB = b.attachments.Count;
-			if (a.attachments.Count != attachmentCountB) return true; // Bounds check for the looped storedAttachments count below.
+            int attachmentCountB = b.attachments.Count;
+            if (a.attachments.Count != attachmentCountB) return true; // Bounds check for the looped storedAttachments count below.
 
-			// Submesh count changed
-			int submeshCountA = a.submeshInstructions.Count;
-			int submeshCountB = b.submeshInstructions.Count;
-			if (submeshCountA != submeshCountB) return true;
+            // Submesh count changed
+            int submeshCountA = a.submeshInstructions.Count;
+            int submeshCountB = b.submeshInstructions.Count;
+            if (submeshCountA != submeshCountB) return true;
 
-			// Submesh Instruction mismatch
-			var submeshInstructionsItemsA = a.submeshInstructions.Items;
-			var submeshInstructionsItemsB = b.submeshInstructions.Items;
+            // Submesh Instruction mismatch
+            var submeshInstructionsItemsA = a.submeshInstructions.Items;
+            var submeshInstructionsItemsB = b.submeshInstructions.Items;
 
-			var attachmentsA = a.attachments.Items;
-			var attachmentsB = b.attachments.Items;
-			for (int i = 0; i < attachmentCountB; i++)
-				if (!System.Object.ReferenceEquals(attachmentsA[i], attachmentsB[i])) return true;
+            var attachmentsA = a.attachments.Items;
+            var attachmentsB = b.attachments.Items;
+            for (int i = 0; i < attachmentCountB; i++)
+                if (!System.Object.ReferenceEquals(attachmentsA[i], attachmentsB[i]))
+                    return true;
 
-			for (int i = 0; i < submeshCountB; i++) {
-				var submeshA = submeshInstructionsItemsA[i];
-				var submeshB = submeshInstructionsItemsB[i];
+            for (int i = 0; i < submeshCountB; i++)
+            {
+                var submeshA = submeshInstructionsItemsA[i];
+                var submeshB = submeshInstructionsItemsB[i];
 
-				if (!(
-					submeshA.rawVertexCount == submeshB.rawVertexCount &&
-					submeshA.startSlot == submeshB.startSlot &&
-					submeshA.endSlot == submeshB.endSlot
-					&& submeshA.rawTriangleCount == submeshB.rawTriangleCount &&
-					submeshA.rawFirstVertexIndex == submeshB.rawFirstVertexIndex
-				))
-					return true;
-			}
+                if (!(
+                         submeshA.rawVertexCount == submeshB.rawVertexCount &&
+                         submeshA.startSlot == submeshB.startSlot &&
+                         submeshA.endSlot == submeshB.endSlot
+                         && submeshA.rawTriangleCount == submeshB.rawTriangleCount &&
+                         submeshA.rawFirstVertexIndex == submeshB.rawFirstVertexIndex
+                     ))
+                    return true;
+            }
 
-			return false;
-			#else
+            return false;
+#else
 			// In normal immutable triangle use, immutableTriangles will be initially false, forcing the smartmesh to update the first time but never again after that, unless there was an immutableTriangles flag mismatch..
 			if (a.immutableTriangles || b.immutableTriangles)
 				return (a.immutableTriangles != b.immutableTriangles);
 
 			return true;
-			#endif
-		}
-	}
+#endif
+        }
+    }
 }

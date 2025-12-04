@@ -31,14 +31,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Spine.Unity {
-	public abstract class AtlasAssetBase : ScriptableObject {
-		public abstract Material PrimaryMaterial { get; }
-		public abstract IEnumerable<Material> Materials { get; }
-		public abstract int MaterialCount { get; }
+namespace Spine.Unity
+{
+    [UnityEngine.Scripting.Preserve]
+    public abstract class AtlasAssetBase : ScriptableObject
+    {
+        [UnityEngine.Scripting.Preserve] public abstract Material PrimaryMaterial { get; }
+        [UnityEngine.Scripting.Preserve] public abstract IEnumerable<Material> Materials { get; }
+        [UnityEngine.Scripting.Preserve] public abstract int MaterialCount { get; }
 
-		public abstract bool IsLoaded { get; }
-		public abstract void Clear ();
-		public abstract Atlas GetAtlas ();
-	}
+        [UnityEngine.Scripting.Preserve] public abstract bool IsLoaded { get; }
+
+        [UnityEngine.Scripting.Preserve]
+        public abstract void Clear();
+
+        [UnityEngine.Scripting.Preserve]
+        public abstract Atlas GetAtlas();
+    }
 }

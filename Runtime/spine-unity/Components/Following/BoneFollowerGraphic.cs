@@ -34,163 +34,198 @@
 using UnityEngine;
 
 
-namespace Spine.Unity {
-	using AxisOrientation = BoneFollower.AxisOrientation;
+namespace Spine.Unity
+{
+    using AxisOrientation = BoneFollower.AxisOrientation;
 
-	#if NEW_PREFAB_SYSTEM
-	[ExecuteAlways]
-	#else
+#if NEW_PREFAB_SYSTEM
+    [ExecuteAlways]
+#else
 	[ExecuteInEditMode]
-	#endif
-	[RequireComponent(typeof(RectTransform)), DisallowMultipleComponent]
-	[AddComponentMenu("Spine/UI/BoneFollowerGraphic")]
-	[HelpURL("http://esotericsoftware.com/spine-unity#BoneFollowerGraphic")]
-	public class BoneFollowerGraphic : MonoBehaviour {
-		public SkeletonGraphic skeletonGraphic;
-		public SkeletonGraphic SkeletonGraphic {
-			get { return skeletonGraphic; }
-			set {
-				skeletonGraphic = value;
-				Initialize();
-			}
-		}
+#endif
+    [RequireComponent(typeof(RectTransform)), DisallowMultipleComponent]
+    [AddComponentMenu("Spine/UI/BoneFollowerGraphic")]
+    [HelpURL("http://esotericsoftware.com/spine-unity#BoneFollowerGraphic")]
+    [UnityEngine.Scripting.Preserve]
+    public class BoneFollowerGraphic : MonoBehaviour
+    {
+        [UnityEngine.Scripting.Preserve] public SkeletonGraphic skeletonGraphic;
 
-		public bool initializeOnAwake = true;
+        [UnityEngine.Scripting.Preserve]
+        public SkeletonGraphic SkeletonGraphic
+        {
+            get { return skeletonGraphic; }
+            set
+            {
+                skeletonGraphic = value;
+                Initialize();
+            }
+        }
 
-		/// <summary>If a bone isn't set in code, boneName is used to find the bone at the beginning. For runtime switching by name, use SetBoneByName. You can also set the BoneFollower.bone field directly.</summary>
-		[SpineBone(dataField: "skeletonGraphic")]
-		public string boneName;
+        [UnityEngine.Scripting.Preserve] public bool initializeOnAwake = true;
 
-		public bool followBoneRotation = true;
-		[Tooltip("Follows the skeleton's flip state by controlling this Transform's local scale.")]
-		public bool followSkeletonFlip = true;
-		[Tooltip("Follows the target bone's local scale. BoneFollower cannot inherit world/skewed scale because of UnityEngine.Transform property limitations.")]
-		public bool followLocalScale = false;
-		public bool followXYPosition = true;
-		public bool followZPosition = true;
-		[Tooltip("Applies when 'Follow Skeleton Flip' is disabled but 'Follow Bone Rotation' is enabled."
-			+ " When flipping the skeleton by scaling its Transform, this follower's rotation is adjusted"
-			+ " instead of its scale to follow the bone orientation. When one of the axes is flipped, "
-			+ " only one axis can be followed, either the X or the Y axis, which is selected here.")]
-		public AxisOrientation maintainedAxisOrientation = AxisOrientation.XAxis;
+        /// <summary>If a bone isn't set in code, boneName is used to find the bone at the beginning. For runtime switching by name, use SetBoneByName. You can also set the BoneFollower.bone field directly.</summary>
+        [SpineBone(dataField: "skeletonGraphic")] [UnityEngine.Scripting.Preserve]
+        public string boneName;
 
-		[System.NonSerialized] public Bone bone;
+        [UnityEngine.Scripting.Preserve] public bool followBoneRotation = true;
 
-		Transform skeletonTransform;
-		bool skeletonTransformIsParent;
+        [Tooltip("Follows the skeleton's flip state by controlling this Transform's local scale.")] [UnityEngine.Scripting.Preserve]
+        public bool followSkeletonFlip = true;
 
-		[System.NonSerialized] public bool valid;
+        [Tooltip("Follows the target bone's local scale. BoneFollower cannot inherit world/skewed scale because of UnityEngine.Transform property limitations.")] [UnityEngine.Scripting.Preserve]
+        public bool followLocalScale = false;
 
-		/// <summary>
-		/// Sets the target bone by its bone name. Returns false if no bone was found.</summary>
-		public bool SetBone (string name) {
-			bone = skeletonGraphic.Skeleton.FindBone(name);
-			if (bone == null) {
-				Debug.LogError("Bone not found: " + name, this);
-				return false;
-			}
-			boneName = name;
-			return true;
-		}
+        [UnityEngine.Scripting.Preserve] public bool followXYPosition = true;
+        [UnityEngine.Scripting.Preserve] public bool followZPosition = true;
 
-		public void Awake () {
-			if (initializeOnAwake) Initialize();
-		}
+        [Tooltip("Applies when 'Follow Skeleton Flip' is disabled but 'Follow Bone Rotation' is enabled."
+                 + " When flipping the skeleton by scaling its Transform, this follower's rotation is adjusted"
+                 + " instead of its scale to follow the bone orientation. When one of the axes is flipped, "
+                 + " only one axis can be followed, either the X or the Y axis, which is selected here.")]
+        [UnityEngine.Scripting.Preserve]
+        public AxisOrientation maintainedAxisOrientation = AxisOrientation.XAxis;
 
-		public void Initialize () {
-			bone = null;
-			valid = skeletonGraphic != null && skeletonGraphic.IsValid;
-			if (!valid) return;
+        [System.NonSerialized] [UnityEngine.Scripting.Preserve]
+        public Bone bone;
 
-			skeletonTransform = skeletonGraphic.transform;
+        Transform skeletonTransform;
+        bool skeletonTransformIsParent;
+
+        [System.NonSerialized] [UnityEngine.Scripting.Preserve]
+        public bool valid;
+
+        /// <summary>
+        /// Sets the target bone by its bone name. Returns false if no bone was found.</summary>
+        [UnityEngine.Scripting.Preserve]
+        public bool SetBone(string name)
+        {
+            bone = skeletonGraphic.Skeleton.FindBone(name);
+            if (bone == null)
+            {
+                Debug.LogError("Bone not found: " + name, this);
+                return false;
+            }
+
+            boneName = name;
+            return true;
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public void Awake()
+        {
+            if (initializeOnAwake) Initialize();
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public void Initialize()
+        {
+            bone = null;
+            valid = skeletonGraphic != null && skeletonGraphic.IsValid;
+            if (!valid) return;
+
+            skeletonTransform = skeletonGraphic.transform;
 //			skeletonGraphic.OnRebuild -= HandleRebuildRenderer;
 //			skeletonGraphic.OnRebuild += HandleRebuildRenderer;
-			skeletonTransformIsParent = Transform.ReferenceEquals(skeletonTransform, transform.parent);
+            skeletonTransformIsParent = Transform.ReferenceEquals(skeletonTransform, transform.parent);
 
-			if (!string.IsNullOrEmpty(boneName))
-				bone = skeletonGraphic.Skeleton.FindBone(boneName);
+            if (!string.IsNullOrEmpty(boneName))
+                bone = skeletonGraphic.Skeleton.FindBone(boneName);
 
-			#if UNITY_EDITOR
-			if (Application.isEditor) {
-				LateUpdate();
-			}
-			#endif
-		}
+#if UNITY_EDITOR
+            if (Application.isEditor)
+            {
+                LateUpdate();
+            }
+#endif
+        }
 
-		public void LateUpdate () {
-			if (!valid) {
-				Initialize();
-				return;
-			}
+        [UnityEngine.Scripting.Preserve]
+        public void LateUpdate()
+        {
+            if (!valid)
+            {
+                Initialize();
+                return;
+            }
 
-			#if UNITY_EDITOR
-			if (!Application.isPlaying)
-				skeletonTransformIsParent = Transform.ReferenceEquals(skeletonTransform, transform.parent);
-			#endif
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                skeletonTransformIsParent = Transform.ReferenceEquals(skeletonTransform, transform.parent);
+#endif
 
-			if (bone == null) {
-				if (string.IsNullOrEmpty(boneName)) return;
-				bone = skeletonGraphic.Skeleton.FindBone(boneName);
-				if (!SetBone(boneName)) return;
-			}
+            if (bone == null)
+            {
+                if (string.IsNullOrEmpty(boneName)) return;
+                bone = skeletonGraphic.Skeleton.FindBone(boneName);
+                if (!SetBone(boneName)) return;
+            }
 
-			var thisTransform = this.transform as RectTransform;
-			if (thisTransform == null) return;
+            var thisTransform = this.transform as RectTransform;
+            if (thisTransform == null) return;
 
-			var canvas = skeletonGraphic.canvas;
-			if (canvas == null) canvas = skeletonGraphic.GetComponentInParent<Canvas>();
-			float scale = canvas != null ? canvas.referencePixelsPerUnit : 100.0f;
+            var canvas = skeletonGraphic.canvas;
+            if (canvas == null) canvas = skeletonGraphic.GetComponentInParent<Canvas>();
+            float scale = canvas != null ? canvas.referencePixelsPerUnit : 100.0f;
 
-			float additionalFlipScale = 1;
-			if (skeletonTransformIsParent) {
-				// Recommended setup: Use local transform properties if Spine GameObject is the immediate parent
-				thisTransform.localPosition = new Vector3(followXYPosition ? bone.worldX * scale : thisTransform.localPosition.x,
-														followXYPosition ? bone.worldY * scale : thisTransform.localPosition.y,
-														followZPosition ? 0f : thisTransform.localPosition.z);
-				if (followBoneRotation) thisTransform.localRotation = bone.GetQuaternion();
-			} else {
-				// For special cases: Use transform world properties if transform relationship is complicated
-				Vector3 targetWorldPosition = skeletonTransform.TransformPoint(new Vector3(bone.worldX * scale, bone.worldY * scale, 0f));
-				if (!followZPosition) targetWorldPosition.z = thisTransform.position.z;
-				if (!followXYPosition) {
-					targetWorldPosition.x = thisTransform.position.x;
-					targetWorldPosition.y = thisTransform.position.y;
-				}
+            float additionalFlipScale = 1;
+            if (skeletonTransformIsParent)
+            {
+                // Recommended setup: Use local transform properties if Spine GameObject is the immediate parent
+                thisTransform.localPosition = new Vector3(followXYPosition ? bone.worldX * scale : thisTransform.localPosition.x,
+                                                          followXYPosition ? bone.worldY * scale : thisTransform.localPosition.y,
+                                                          followZPosition ? 0f : thisTransform.localPosition.z);
+                if (followBoneRotation) thisTransform.localRotation = bone.GetQuaternion();
+            }
+            else
+            {
+                // For special cases: Use transform world properties if transform relationship is complicated
+                Vector3 targetWorldPosition = skeletonTransform.TransformPoint(new Vector3(bone.worldX * scale, bone.worldY * scale, 0f));
+                if (!followZPosition) targetWorldPosition.z = thisTransform.position.z;
+                if (!followXYPosition)
+                {
+                    targetWorldPosition.x = thisTransform.position.x;
+                    targetWorldPosition.y = thisTransform.position.y;
+                }
 
-				Vector3 skeletonLossyScale = skeletonTransform.lossyScale;
-				Transform transformParent = thisTransform.parent;
-				Vector3 parentLossyScale = transformParent != null ? transformParent.lossyScale : Vector3.one;
-				if (followBoneRotation) {
-					float boneWorldRotation = bone.WorldRotationX;
+                Vector3 skeletonLossyScale = skeletonTransform.lossyScale;
+                Transform transformParent = thisTransform.parent;
+                Vector3 parentLossyScale = transformParent != null ? transformParent.lossyScale : Vector3.one;
+                if (followBoneRotation)
+                {
+                    float boneWorldRotation = bone.WorldRotationX;
 
-					if ((skeletonLossyScale.x * skeletonLossyScale.y) < 0)
-						boneWorldRotation = -boneWorldRotation;
+                    if ((skeletonLossyScale.x * skeletonLossyScale.y) < 0)
+                        boneWorldRotation = -boneWorldRotation;
 
-					if (followSkeletonFlip || maintainedAxisOrientation == AxisOrientation.XAxis) {
-						if ((skeletonLossyScale.x * parentLossyScale.x < 0))
-							boneWorldRotation += 180f;
-					}
-					else {
-						if ((skeletonLossyScale.y * parentLossyScale.y < 0))
-							boneWorldRotation += 180f;
-					}
+                    if (followSkeletonFlip || maintainedAxisOrientation == AxisOrientation.XAxis)
+                    {
+                        if ((skeletonLossyScale.x * parentLossyScale.x < 0))
+                            boneWorldRotation += 180f;
+                    }
+                    else
+                    {
+                        if ((skeletonLossyScale.y * parentLossyScale.y < 0))
+                            boneWorldRotation += 180f;
+                    }
 
-					Vector3 worldRotation = skeletonTransform.rotation.eulerAngles;
-					if (followLocalScale && bone.scaleX < 0) boneWorldRotation += 180f;
-					thisTransform.SetPositionAndRotation(targetWorldPosition, Quaternion.Euler(worldRotation.x, worldRotation.y, worldRotation.z + boneWorldRotation));
-				} else {
-					thisTransform.position = targetWorldPosition;
-				}
+                    Vector3 worldRotation = skeletonTransform.rotation.eulerAngles;
+                    if (followLocalScale && bone.scaleX < 0) boneWorldRotation += 180f;
+                    thisTransform.SetPositionAndRotation(targetWorldPosition, Quaternion.Euler(worldRotation.x, worldRotation.y, worldRotation.z + boneWorldRotation));
+                }
+                else
+                {
+                    thisTransform.position = targetWorldPosition;
+                }
 
-				additionalFlipScale = Mathf.Sign(skeletonLossyScale.x * parentLossyScale.x
-												* skeletonLossyScale.y * parentLossyScale.y);
-			}
+                additionalFlipScale = Mathf.Sign(skeletonLossyScale.x * parentLossyScale.x
+                                                                      * skeletonLossyScale.y * parentLossyScale.y);
+            }
 
-			Vector3 localScale = followLocalScale ? new Vector3(bone.scaleX, bone.scaleY, 1f) : new Vector3(1f, 1f, 1f);
-			if (followSkeletonFlip)
-				localScale.y *= Mathf.Sign(bone.skeleton.ScaleX * bone.skeleton.ScaleY) * additionalFlipScale;
-			thisTransform.localScale = localScale;
-		}
-
-	}
+            Vector3 localScale = followLocalScale ? new Vector3(bone.scaleX, bone.scaleY, 1f) : new Vector3(1f, 1f, 1f);
+            if (followSkeletonFlip)
+                localScale.y *= Mathf.Sign(bone.skeleton.ScaleX * bone.skeleton.ScaleY) * additionalFlipScale;
+            thisTransform.localScale = localScale;
+        }
+    }
 }

@@ -34,7 +34,7 @@ using Spine;
 
 // MITCH: handle TPackerCW flip mode (probably not swap uv horizontaly)
 namespace Spine.Unity.TK2D {
-	public class SpriteCollectionAttachmentLoader : AttachmentLoader {
+	[UnityEngine.Scripting.Preserve]public class SpriteCollectionAttachmentLoader : AttachmentLoader {
 		private tk2dSpriteCollectionData sprites;
 		private float u, v, u2, v2;
 		private bool regionRotated;
@@ -43,7 +43,7 @@ namespace Spine.Unity.TK2D {
 		private float regionOffsetX, regionOffsetY;
 		private Material material;
 
-		public SpriteCollectionAttachmentLoader (tk2dSpriteCollectionData sprites) {
+		[UnityEngine.Scripting.Preserve]public SpriteCollectionAttachmentLoader (tk2dSpriteCollectionData sprites) {
 			if (sprites == null)
 				throw new ArgumentNullException("sprites cannot be null.");
 			this.sprites = sprites;
@@ -100,7 +100,7 @@ namespace Spine.Unity.TK2D {
 			material = def.materialInst;
 		}
 
-		public RegionAttachment NewRegionAttachment (Skin skin, String name, String path) {
+		[UnityEngine.Scripting.Preserve]public RegionAttachment NewRegionAttachment (Skin skin, String name, String path) {
 			ProcessSpriteDefinition(path);
 
 			RegionAttachment region = new RegionAttachment(name);
@@ -116,7 +116,7 @@ namespace Spine.Unity.TK2D {
 			return region;
 		}
 
-		public MeshAttachment NewMeshAttachment (Skin skin, String name, String path) {
+		[UnityEngine.Scripting.Preserve]public MeshAttachment NewMeshAttachment (Skin skin, String name, String path) {
 			ProcessSpriteDefinition(path);
 
 			MeshAttachment mesh = new MeshAttachment(name);
@@ -136,19 +136,19 @@ namespace Spine.Unity.TK2D {
 			return mesh;
 		}
 
-		public BoundingBoxAttachment NewBoundingBoxAttachment (Skin skin, String name) {
+		[UnityEngine.Scripting.Preserve]public BoundingBoxAttachment NewBoundingBoxAttachment (Skin skin, String name) {
 			return new BoundingBoxAttachment(name);
 		}
 
-		public PathAttachment NewPathAttachment (Skin skin, string name) {
+		[UnityEngine.Scripting.Preserve]public PathAttachment NewPathAttachment (Skin skin, string name) {
 			return new PathAttachment(name);
 		}
 
-		public PointAttachment NewPointAttachment (Skin skin, string name) {
+		[UnityEngine.Scripting.Preserve]public PointAttachment NewPointAttachment (Skin skin, string name) {
 			return new PointAttachment(name);
 		}
 
-		public ClippingAttachment NewClippingAttachment (Skin skin, string name) {
+		[UnityEngine.Scripting.Preserve]public ClippingAttachment NewClippingAttachment (Skin skin, string name) {
 			return new ClippingAttachment(name);
 		}
 	}

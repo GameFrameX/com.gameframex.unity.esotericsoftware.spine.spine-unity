@@ -1,11 +1,9 @@
-﻿using UnityEngine.Scripting;
-
-namespace Spine.Unity
+﻿namespace Spine.Unity
 {
-    [Preserve]
+    [UnityEngine.Scripting.Preserve]
     public class SpineUnityCroppingHelper : UnityEngine.MonoBehaviour
     {
-        [Preserve]
+        [UnityEngine.Scripting.Preserve]
         public void Start()
         {
             _ = typeof(Spine.Collections.OrderedDictionary<,>);

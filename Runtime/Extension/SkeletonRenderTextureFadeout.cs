@@ -48,16 +48,18 @@ namespace Spine.Unity
     /// a method that disables or destroys the entire GameObject.
     /// </summary>
     [RequireComponent(typeof(SkeletonRenderTextureBase))]
+    [UnityEngine.Scripting.Preserve]
     public class SkeletonRenderTextureFadeout : MonoBehaviour
     {
         SkeletonRenderTextureBase skeletonRenderTexture;
 
-        public float fadeoutSeconds = 2.0f;
+        [UnityEngine.Scripting.Preserve] public float fadeoutSeconds = 2.0f;
         protected float fadeoutSecondsRemaining;
 
+        [UnityEngine.Scripting.Preserve]
         public delegate void FadeoutCallback(SkeletonRenderTextureFadeout skeleton);
 
-        public event FadeoutCallback OnFadeoutComplete;
+        [UnityEngine.Scripting.Preserve] public event FadeoutCallback OnFadeoutComplete;
 
         protected void Awake()
         {

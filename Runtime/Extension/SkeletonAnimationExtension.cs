@@ -2,7 +2,7 @@
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
 //  均受中华人民共和国及相关国际法律法规保护。
-//  are protected by the laws of the People's Republic of China and relevant international regulations.
+//  are protected by the laws of the People's Re[UnityEngine.Scripting.Preserve]public of China and relevant international regulations.
 // 
 //  使用本项目须严格遵守相应法律法规及开源许可证之规定。
 //  Usage of this project must strictly comply with applicable laws, regulations, and open-source licenses.
@@ -34,6 +34,7 @@ using UnityEngine;
 
 namespace Spine.Unity
 {
+    [UnityEngine.Scripting.Preserve]
     public static class SkeletonAnimationExtension
     {
         /// <summary>
@@ -41,6 +42,7 @@ namespace Spine.Unity
         /// </summary>
         /// <param name="skeletonAnimation">SkeletonAnimation组件</param>
         /// <returns>返回Renderer的sortingOrder；若未找到Renderer则返回默认值0</returns>
+        [UnityEngine.Scripting.Preserve]
         public static int GetSortingOrder(this SkeletonAnimation skeletonAnimation)
         {
             var render = skeletonAnimation.GetComponent<Renderer>();
@@ -57,6 +59,7 @@ namespace Spine.Unity
         /// </summary>
         /// <param name="skeletonAnimation">SkeletonAnimation组件</param>
         /// <param name="sortingOrder">要设置的排序层级数值</param>
+        [UnityEngine.Scripting.Preserve]
         public static void SetSortingOrder(this SkeletonAnimation skeletonAnimation, int sortingOrder)
         {
             var render = skeletonAnimation.GetComponent<Renderer>();
@@ -75,6 +78,7 @@ namespace Spine.Unity
         /// <param name="skeletonAnimation">SkeletonAnimation组件</param>
         /// <param name="animationName">要检查的动画名称</param>
         /// <returns>如果动画存在则返回true，否则返回false</returns>
+        [UnityEngine.Scripting.Preserve]
         public static bool HasAnimation(this SkeletonAnimation skeletonAnimation, string animationName)
         {
             var skeletonData = skeletonAnimation.Skeleton.Data;
@@ -87,6 +91,7 @@ namespace Spine.Unity
         /// </summary>
         /// <param name="skeletonAnimation">SkeletonAnimation组件</param>
         /// <returns>当前播放的动画名称；若未播放任何动画则返回空字符串</returns>
+        [UnityEngine.Scripting.Preserve]
         public static string GetCurrentAnimationName(this SkeletonAnimation skeletonAnimation)
         {
             var currentEntry = skeletonAnimation.AnimationState.GetCurrent(0);
@@ -100,6 +105,7 @@ namespace Spine.Unity
         /// <param name="animationName">要播放的动画名称</param>
         /// <param name="loop">是否循环播放动画，true为循环播放，false为播放一次</param>
         /// <param name="onComplete">动画播放完成时的回调函数，仅在非循环模式下生效</param>
+        [UnityEngine.Scripting.Preserve]
         public static void PlayAnimation(this SkeletonAnimation skeletonAnimation, string animationName, bool loop = false, Action onComplete = null)
         {
             PlayAnimation(skeletonAnimation, animationName, 0, loop, onComplete);
@@ -113,6 +119,7 @@ namespace Spine.Unity
         /// <param name="trackIndex">动画轨道索引，用于混合多个动画，默认为0</param>
         /// <param name="loop">是否循环播放动画，true为循环播放，false为播放一次</param>
         /// <param name="onComplete">动画播放完成时的回调函数，仅在非循环模式下生效</param>
+        [UnityEngine.Scripting.Preserve]
         public static void PlayAnimation(this SkeletonAnimation skeletonAnimation, string animationName, int trackIndex = 0, bool loop = false, Action onComplete = null)
         {
             // 定义动画完成时的回调处理函数

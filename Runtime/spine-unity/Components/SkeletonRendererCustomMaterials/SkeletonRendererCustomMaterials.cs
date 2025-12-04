@@ -38,175 +38,209 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Spine.Unity {
-	#if NEW_PREFAB_SYSTEM
-	[ExecuteAlways]
-	#else
+namespace Spine.Unity
+{
+#if NEW_PREFAB_SYSTEM
+    [ExecuteAlways]
+#else
 	[ExecuteInEditMode]
-	#endif
-	[HelpURL("http://esotericsoftware.com/spine-unity#SkeletonRendererCustomMaterials")]
-	public class SkeletonRendererCustomMaterials : MonoBehaviour {
+#endif
+    [HelpURL("http://esotericsoftware.com/spine-unity#SkeletonRendererCustomMaterials")]
+    [UnityEngine.Scripting.Preserve]
+    public class SkeletonRendererCustomMaterials : MonoBehaviour
+    {
+        #region Inspector
 
-		#region Inspector
-		public SkeletonRenderer skeletonRenderer;
-		[SerializeField] protected List<SlotMaterialOverride> customSlotMaterials = new List<SlotMaterialOverride>();
-		[SerializeField] protected List<AtlasMaterialOverride> customMaterialOverrides = new List<AtlasMaterialOverride>();
+        [UnityEngine.Scripting.Preserve] public SkeletonRenderer skeletonRenderer;
+        [SerializeField] protected List<SlotMaterialOverride> customSlotMaterials = new List<SlotMaterialOverride>();
+        [SerializeField] protected List<AtlasMaterialOverride> customMaterialOverrides = new List<AtlasMaterialOverride>();
 
-		#if UNITY_EDITOR
-		void Reset () {
-			skeletonRenderer = GetComponent<SkeletonRenderer>();
+#if UNITY_EDITOR
+        void Reset()
+        {
+            skeletonRenderer = GetComponent<SkeletonRenderer>();
 
-			// Populate atlas list
-			if (skeletonRenderer != null && skeletonRenderer.skeletonDataAsset != null) {
-				var atlasAssets = skeletonRenderer.skeletonDataAsset.atlasAssets;
+            // Populate atlas list
+            if (skeletonRenderer != null && skeletonRenderer.skeletonDataAsset != null)
+            {
+                var atlasAssets = skeletonRenderer.skeletonDataAsset.atlasAssets;
 
-				var initialAtlasMaterialOverrides = new List<AtlasMaterialOverride>();
-				foreach (AtlasAssetBase atlasAsset in atlasAssets) {
-					foreach (Material atlasMaterial in atlasAsset.Materials) {
-						var atlasMaterialOverride = new AtlasMaterialOverride {
-							overrideDisabled = true,
-							originalMaterial = atlasMaterial
-						};
+                var initialAtlasMaterialOverrides = new List<AtlasMaterialOverride>();
+                foreach (AtlasAssetBase atlasAsset in atlasAssets)
+                {
+                    foreach (Material atlasMaterial in atlasAsset.Materials)
+                    {
+                        var atlasMaterialOverride = new AtlasMaterialOverride
+                        {
+                            overrideDisabled = true,
+                            originalMaterial = atlasMaterial
+                        };
 
-						initialAtlasMaterialOverrides.Add(atlasMaterialOverride);
-					}
-				}
+                        initialAtlasMaterialOverrides.Add(atlasMaterialOverride);
+                    }
+                }
 
-				customMaterialOverrides = initialAtlasMaterialOverrides;
-			}
-		}
-		#endif
-		#endregion
+                customMaterialOverrides = initialAtlasMaterialOverrides;
+            }
+        }
+#endif
 
-		void SetCustomSlotMaterials () {
-			if (skeletonRenderer == null) {
-				Debug.LogError("skeletonRenderer == null");
-				return;
-			}
+        #endregion
 
-			for (int i = 0; i < customSlotMaterials.Count; i++) {
-				SlotMaterialOverride slotMaterialOverride = customSlotMaterials[i];
-				if (slotMaterialOverride.overrideDisabled || string.IsNullOrEmpty(slotMaterialOverride.slotName))
-					continue;
+        void SetCustomSlotMaterials()
+        {
+            if (skeletonRenderer == null)
+            {
+                Debug.LogError("skeletonRenderer == null");
+                return;
+            }
 
-				Slot slotObject = skeletonRenderer.skeleton.FindSlot(slotMaterialOverride.slotName);
-				skeletonRenderer.CustomSlotMaterials[slotObject] = slotMaterialOverride.material;
-			}
-		}
+            for (int i = 0; i < customSlotMaterials.Count; i++)
+            {
+                SlotMaterialOverride slotMaterialOverride = customSlotMaterials[i];
+                if (slotMaterialOverride.overrideDisabled || string.IsNullOrEmpty(slotMaterialOverride.slotName))
+                    continue;
 
-		void RemoveCustomSlotMaterials () {
-			if (skeletonRenderer == null) {
-				Debug.LogError("skeletonRenderer == null");
-				return;
-			}
+                Slot slotObject = skeletonRenderer.skeleton.FindSlot(slotMaterialOverride.slotName);
+                skeletonRenderer.CustomSlotMaterials[slotObject] = slotMaterialOverride.material;
+            }
+        }
 
-			for (int i = 0; i < customSlotMaterials.Count; i++) {
-				SlotMaterialOverride slotMaterialOverride = customSlotMaterials[i];
-				if (string.IsNullOrEmpty(slotMaterialOverride.slotName))
-					continue;
+        void RemoveCustomSlotMaterials()
+        {
+            if (skeletonRenderer == null)
+            {
+                Debug.LogError("skeletonRenderer == null");
+                return;
+            }
 
-				Slot slotObject = skeletonRenderer.skeleton.FindSlot(slotMaterialOverride.slotName);
+            for (int i = 0; i < customSlotMaterials.Count; i++)
+            {
+                SlotMaterialOverride slotMaterialOverride = customSlotMaterials[i];
+                if (string.IsNullOrEmpty(slotMaterialOverride.slotName))
+                    continue;
 
-				Material currentMaterial;
-				if (!skeletonRenderer.CustomSlotMaterials.TryGetValue(slotObject, out currentMaterial))
-					continue;
+                Slot slotObject = skeletonRenderer.skeleton.FindSlot(slotMaterialOverride.slotName);
 
-				// Do not revert the material if it was changed by something else
-				if (currentMaterial != slotMaterialOverride.material)
-					continue;
+                Material currentMaterial;
+                if (!skeletonRenderer.CustomSlotMaterials.TryGetValue(slotObject, out currentMaterial))
+                    continue;
 
-				skeletonRenderer.CustomSlotMaterials.Remove(slotObject);
-			}
-		}
+                // Do not revert the material if it was changed by something else
+                if (currentMaterial != slotMaterialOverride.material)
+                    continue;
 
-		void SetCustomMaterialOverrides () {
-			if (skeletonRenderer == null) {
-				Debug.LogError("skeletonRenderer == null");
-				return;
-			}
+                skeletonRenderer.CustomSlotMaterials.Remove(slotObject);
+            }
+        }
 
-			#if SPINE_OPTIONAL_MATERIALOVERRIDE
-			for (int i = 0; i < customMaterialOverrides.Count; i++) {
-				AtlasMaterialOverride atlasMaterialOverride = customMaterialOverrides[i];
-				if (atlasMaterialOverride.overrideDisabled)
-					continue;
+        void SetCustomMaterialOverrides()
+        {
+            if (skeletonRenderer == null)
+            {
+                Debug.LogError("skeletonRenderer == null");
+                return;
+            }
 
-				skeletonRenderer.CustomMaterialOverride[atlasMaterialOverride.originalMaterial] = atlasMaterialOverride.replacementMaterial;
-			}
-			#endif
-		}
+#if SPINE_OPTIONAL_MATERIALOVERRIDE
+            for (int i = 0; i < customMaterialOverrides.Count; i++)
+            {
+                AtlasMaterialOverride atlasMaterialOverride = customMaterialOverrides[i];
+                if (atlasMaterialOverride.overrideDisabled)
+                    continue;
 
-		void RemoveCustomMaterialOverrides () {
-			if (skeletonRenderer == null) {
-				Debug.LogError("skeletonRenderer == null");
-				return;
-			}
+                skeletonRenderer.CustomMaterialOverride[atlasMaterialOverride.originalMaterial] = atlasMaterialOverride.replacementMaterial;
+            }
+#endif
+        }
 
-			#if SPINE_OPTIONAL_MATERIALOVERRIDE
-			for (int i = 0; i < customMaterialOverrides.Count; i++) {
-				AtlasMaterialOverride atlasMaterialOverride = customMaterialOverrides[i];
-				Material currentMaterial;
+        void RemoveCustomMaterialOverrides()
+        {
+            if (skeletonRenderer == null)
+            {
+                Debug.LogError("skeletonRenderer == null");
+                return;
+            }
 
-				if (!skeletonRenderer.CustomMaterialOverride.TryGetValue(atlasMaterialOverride.originalMaterial, out currentMaterial))
-					continue;
+#if SPINE_OPTIONAL_MATERIALOVERRIDE
+            for (int i = 0; i < customMaterialOverrides.Count; i++)
+            {
+                AtlasMaterialOverride atlasMaterialOverride = customMaterialOverrides[i];
+                Material currentMaterial;
 
-				// Do not revert the material if it was changed by something else
-				if (currentMaterial != atlasMaterialOverride.replacementMaterial)
-					continue;
+                if (!skeletonRenderer.CustomMaterialOverride.TryGetValue(atlasMaterialOverride.originalMaterial, out currentMaterial))
+                    continue;
 
-				skeletonRenderer.CustomMaterialOverride.Remove(atlasMaterialOverride.originalMaterial);
-			}
-			#endif
-		}
+                // Do not revert the material if it was changed by something else
+                if (currentMaterial != atlasMaterialOverride.replacementMaterial)
+                    continue;
 
-		// OnEnable applies the overrides at runtime, and when the editor loads.
-		void OnEnable () {
-			if (skeletonRenderer == null)
-				skeletonRenderer = GetComponent<SkeletonRenderer>();
+                skeletonRenderer.CustomMaterialOverride.Remove(atlasMaterialOverride.originalMaterial);
+            }
+#endif
+        }
 
-			if (skeletonRenderer == null) {
-				Debug.LogError("skeletonRenderer == null");
-				return;
-			}
+        // OnEnable applies the overrides at runtime, and when the editor loads.
+        void OnEnable()
+        {
+            if (skeletonRenderer == null)
+                skeletonRenderer = GetComponent<SkeletonRenderer>();
 
-			skeletonRenderer.Initialize(false);
-			SetCustomMaterialOverrides();
-			SetCustomSlotMaterials();
-		}
+            if (skeletonRenderer == null)
+            {
+                Debug.LogError("skeletonRenderer == null");
+                return;
+            }
 
-		// OnDisable removes the overrides at runtime, and in the editor when the component is disabled or destroyed.
-		void OnDisable () {
-			if (skeletonRenderer == null) {
-				Debug.LogError("skeletonRenderer == null");
-				return;
-			}
+            skeletonRenderer.Initialize(false);
+            SetCustomMaterialOverrides();
+            SetCustomSlotMaterials();
+        }
 
-			RemoveCustomMaterialOverrides();
-			RemoveCustomSlotMaterials();
-		}
+        // OnDisable removes the overrides at runtime, and in the editor when the component is disabled or destroyed.
+        void OnDisable()
+        {
+            if (skeletonRenderer == null)
+            {
+                Debug.LogError("skeletonRenderer == null");
+                return;
+            }
 
-		[Serializable]
-		public struct SlotMaterialOverride : IEquatable<SlotMaterialOverride> {
-			public bool overrideDisabled;
+            RemoveCustomMaterialOverrides();
+            RemoveCustomSlotMaterials();
+        }
 
-			[SpineSlot]
-			public string slotName;
-			public Material material;
+        [Serializable]
+        [UnityEngine.Scripting.Preserve]
+        public struct SlotMaterialOverride : IEquatable<SlotMaterialOverride>
+        {
+            [UnityEngine.Scripting.Preserve] public bool overrideDisabled;
 
-			public bool Equals (SlotMaterialOverride other) {
-				return overrideDisabled == other.overrideDisabled && slotName == other.slotName && material == other.material;
-			}
-		}
+            [SpineSlot] [UnityEngine.Scripting.Preserve]
+            public string slotName;
 
-		[Serializable]
-		public struct AtlasMaterialOverride : IEquatable<AtlasMaterialOverride> {
-			public bool overrideDisabled;
-			public Material originalMaterial;
-			public Material replacementMaterial;
+            [UnityEngine.Scripting.Preserve] public Material material;
 
-			public bool Equals (AtlasMaterialOverride other) {
-				return overrideDisabled == other.overrideDisabled && originalMaterial == other.originalMaterial && replacementMaterial == other.replacementMaterial;
-			}
-		}
-	}
+            [UnityEngine.Scripting.Preserve]
+            public bool Equals(SlotMaterialOverride other)
+            {
+                return overrideDisabled == other.overrideDisabled && slotName == other.slotName && material == other.material;
+            }
+        }
+
+        [Serializable]
+        [UnityEngine.Scripting.Preserve]
+        public struct AtlasMaterialOverride : IEquatable<AtlasMaterialOverride>
+        {
+            [UnityEngine.Scripting.Preserve] public bool overrideDisabled;
+            [UnityEngine.Scripting.Preserve] public Material originalMaterial;
+            [UnityEngine.Scripting.Preserve] public Material replacementMaterial;
+
+            [UnityEngine.Scripting.Preserve]
+            public bool Equals(AtlasMaterialOverride other)
+            {
+                return overrideDisabled == other.overrideDisabled && originalMaterial == other.originalMaterial && replacementMaterial == other.replacementMaterial;
+            }
+        }
+    }
 }

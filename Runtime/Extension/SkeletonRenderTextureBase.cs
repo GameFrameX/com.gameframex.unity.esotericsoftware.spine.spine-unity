@@ -37,20 +37,22 @@ using UnityEngine.Rendering;
 
 namespace Spine.Unity
 {
+    [UnityEngine.Scripting.Preserve]
     public abstract class SkeletonRenderTextureBase : MonoBehaviour
     {
 #if HAS_VECTOR2INT
-        public Color color = Color.white;
-        public int maxRenderTextureSize = 1024;
-        public GameObject quad;
-        public Material quadMaterial;
+        [UnityEngine.Scripting.Preserve] public Color color = Color.white;
+        [UnityEngine.Scripting.Preserve] public int maxRenderTextureSize = 1024;
+        [UnityEngine.Scripting.Preserve] public GameObject quad;
+        [UnityEngine.Scripting.Preserve] public Material quadMaterial;
         protected Mesh quadMesh;
-        public RenderTexture renderTexture;
-        public Camera targetCamera;
+        [UnityEngine.Scripting.Preserve] public RenderTexture renderTexture;
+        [UnityEngine.Scripting.Preserve] public Camera targetCamera;
 
         [Tooltip("Shader passes to render to the RenderTexture. E.g. set the first element " +
                  "to -1 to render all shader passes, or set it to 0 to only render the first " +
                  "shader pass, which may be required when using URP or shadow-casting shaders.")]
+        [UnityEngine.Scripting.Preserve]
         public int[] shaderPasses = new int[1] { 0 };
 
         protected CommandBuffer commandBuffer;

@@ -29,24 +29,35 @@
 
 using System;
 
-namespace Spine {
-	abstract public class Attachment {
-		public string Name { get; private set; }
+namespace Spine
+{
+    [UnityEngine.Scripting.Preserve]
+    abstract
+        public class Attachment
+    {
+        [UnityEngine.Scripting.Preserve] public string Name { get; private set; }
 
-		protected Attachment (string name) {
-			if (name == null) throw new ArgumentNullException("name", "name cannot be null");
-			Name = name;
-		}
+        protected Attachment(string name)
+        {
+            if (name == null) throw new ArgumentNullException("name", "name cannot be null");
+            Name = name;
+        }
 
-		override public string ToString () {
-			return Name;
-		}
+        [UnityEngine.Scripting.Preserve]
+        override
+            public string ToString()
+        {
+            return Name;
+        }
 
-		///<summary>Returns a copy of the attachment.</summary>
-		public abstract Attachment Copy ();
-	}
+        ///<summary>Returns a copy of the attachment.</summary>
+        [UnityEngine.Scripting.Preserve]
+        public abstract Attachment Copy();
+    }
 
-	public interface IHasRendererObject {
-		object RendererObject { get; set; }
-	}
+    [UnityEngine.Scripting.Preserve]
+    public interface IHasRendererObject
+    {
+        object RendererObject { get; set; }
+    }
 }

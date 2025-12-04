@@ -2,7 +2,7 @@
 //  GameFrameX 组织及其衍生项目的版权、商标、专利及其他相关权利
 //  GameFrameX organization and its derivative projects' copyrights, trademarks, patents, and related rights
 //  均受中华人民共和国及相关国际法律法规保护。
-//  are protected by the laws of the People's Republic of China and relevant international regulations.
+//  are protected by the laws of the People's Re[UnityEngine.Scripting.Preserve]public of China and relevant international regulations.
 // 
 //  使用本项目须严格遵守相应法律法规及开源许可证之规定。
 //  Usage of this project must strictly comply with applicable laws, regulations, and open-source licenses.
@@ -33,6 +33,7 @@ using UnityEngine;
 
 namespace Spine.Unity
 {
+    [UnityEngine.Scripting.Preserve]
     public static class SkeletonDataAssetExtension
     {
         /// <summary>
@@ -44,6 +45,7 @@ namespace Spine.Unity
         /// <param name="isLoop">是否循环播放</param>
         /// <param name="quiet">是否静默添加（不输出日志）</param>
         /// <returns>添加或更新后的 SkeletonAnimation 组件</returns>
+        [UnityEngine.Scripting.Preserve]
         public static SkeletonAnimation AddOrReplace(this GameObject gameObject, SkeletonDataAsset skeletonDataAsset, string animationName = null, bool isLoop = false, bool quiet = false)
         {
             if (skeletonDataAsset == null)
@@ -77,6 +79,7 @@ namespace Spine.Unity
         /// <param name="skeletonAnimation">目标 SkeletonAnimation</param>
         /// <param name="animationName">需要切换的动画名称，为空则清空轨道</param>
         /// <param name="isLoop">是否循环</param>
+        [UnityEngine.Scripting.Preserve]
         public static void OnChangeSpine(this SkeletonAnimation skeletonAnimation, string animationName, bool isLoop)
         {
             var skeletonData = skeletonAnimation.Skeleton.Data;

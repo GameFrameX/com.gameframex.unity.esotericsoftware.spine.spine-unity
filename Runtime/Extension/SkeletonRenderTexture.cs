@@ -50,6 +50,7 @@ namespace Spine.Unity
     /// because of the additional rendering overhead. Only enable it when alpha blending is required.
     /// </summary>
     [RequireComponent(typeof(SkeletonRenderer))]
+    [UnityEngine.Scripting.Preserve]
     public class SkeletonRenderTexture : SkeletonRenderTextureBase
     {
 #if HAS_GET_SHARED_MATERIALS

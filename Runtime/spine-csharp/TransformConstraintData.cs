@@ -29,32 +29,117 @@
 
 using System;
 
-namespace Spine {
-	public class TransformConstraintData : ConstraintData {
-		internal ExposedList<BoneData> bones = new ExposedList<BoneData>();
-		internal BoneData target;
-		internal float rotateMix, translateMix, scaleMix, shearMix;
-		internal float offsetRotation, offsetX, offsetY, offsetScaleX, offsetScaleY, offsetShearY;
-		internal bool relative, local;
+namespace Spine
+{
+    [UnityEngine.Scripting.Preserve]
+    public class TransformConstraintData : ConstraintData
+    {
+        internal ExposedList<BoneData> bones = new ExposedList<BoneData>();
+        internal BoneData target;
+        internal float rotateMix, translateMix, scaleMix, shearMix;
+        internal float offsetRotation, offsetX, offsetY, offsetScaleX, offsetScaleY, offsetShearY;
+        internal bool relative, local;
 
-		public ExposedList<BoneData> Bones { get { return bones; } }
-		public BoneData Target { get { return target; } set { target = value; } }
-		public float RotateMix { get { return rotateMix; } set { rotateMix = value; } }
-		public float TranslateMix { get { return translateMix; } set { translateMix = value; } }
-		public float ScaleMix { get { return scaleMix; } set { scaleMix = value; } }
-		public float ShearMix { get { return shearMix; } set { shearMix = value; } }
+        [UnityEngine.Scripting.Preserve]
+        public ExposedList<BoneData> Bones
+        {
+            get { return bones; }
+        }
 
-		public float OffsetRotation { get { return offsetRotation; } set { offsetRotation = value; } }
-		public float OffsetX { get { return offsetX; } set { offsetX = value; } }
-		public float OffsetY { get { return offsetY; } set { offsetY = value; } }
-		public float OffsetScaleX { get { return offsetScaleX; } set { offsetScaleX = value; } }
-		public float OffsetScaleY { get { return offsetScaleY; } set { offsetScaleY = value; } }
-		public float OffsetShearY { get { return offsetShearY; } set { offsetShearY = value; } }
+        [UnityEngine.Scripting.Preserve]
+        public BoneData Target
+        {
+            get { return target; }
+            set { target = value; }
+        }
 
-		public bool Relative { get { return relative; } set { relative = value; } }
-		public bool Local { get { return local; } set { local = value; } }
+        [UnityEngine.Scripting.Preserve]
+        public float RotateMix
+        {
+            get { return rotateMix; }
+            set { rotateMix = value; }
+        }
 
-		public TransformConstraintData (string name) : base(name) {
-		}
-	}
+        [UnityEngine.Scripting.Preserve]
+        public float TranslateMix
+        {
+            get { return translateMix; }
+            set { translateMix = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public float ScaleMix
+        {
+            get { return scaleMix; }
+            set { scaleMix = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public float ShearMix
+        {
+            get { return shearMix; }
+            set { shearMix = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public float OffsetRotation
+        {
+            get { return offsetRotation; }
+            set { offsetRotation = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public float OffsetX
+        {
+            get { return offsetX; }
+            set { offsetX = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public float OffsetY
+        {
+            get { return offsetY; }
+            set { offsetY = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public float OffsetScaleX
+        {
+            get { return offsetScaleX; }
+            set { offsetScaleX = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public float OffsetScaleY
+        {
+            get { return offsetScaleY; }
+            set { offsetScaleY = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public float OffsetShearY
+        {
+            get { return offsetShearY; }
+            set { offsetShearY = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public bool Relative
+        {
+            get { return relative; }
+            set { relative = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public bool Local
+        {
+            get { return local; }
+            set { local = value; }
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public TransformConstraintData(string name) : base(name)
+        {
+        }
+    }
 }
