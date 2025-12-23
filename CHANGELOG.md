@@ -1,3 +1,12 @@
+# [3.9.0](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.8.6...3.9.0) (2025-12-23)
+
+
+### Features
+
+* 为多个类和接口添加UnityEngine.Scripting.Preserve属性 ([a8cf742](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/commit/a8cf74244d603797879bc3c7a555130e2f4b702b))
+* **动画扩展:** 添加检查动画存在和获取当前动画名称的方法 ([715bd8a](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/commit/715bd8adf532d3920c20a4abfc018b2e20152bb1))
+* 添加骨骼渲染纹理组件及数学工具类 ([c1f2b34](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/commit/c1f2b340a5bff1a115f5fcea944206a0760b28d3))
+
 # Changelog
 
 ## [3.8.6](https://github.com/GameFrameX/com.gameframex.unity.esotericsoftware.spine.spine-unity/tree/3.8.6) (2025-11-06)
