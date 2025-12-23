@@ -5,9 +5,9 @@
   "version": "3.8.6",
   "unity": "2018.3",
   "author": {
-    "name": "Esoteric Software",
-    "email": "contact@esotericsoftware.com",
-    "url": "http://esotericsoftware.com/"
+    "name": "Blank",
+    "email": "alianblank@outlook.com",
+    "url": "https://gameframex.doc.alianblank.com"
   },
   "dependencies": {},
   "samples": [
@@ -20,5 +20,19 @@
     "spine",
     "spine-unity",
     "core"
-  ]
+  ],
+  "devDependencies": {
+    "semantic-release": "^24.2.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.cnb.cool/GameFrameX/npm/-/packages/"
+  },
+  "repository": {
+    "name": "com.gameframex.unity.esotericsoftware.spine.spine-unity",
+    "url": "git+https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity.git",
+    "type": "git"
+  }
 }
