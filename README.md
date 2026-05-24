@@ -1,30 +1,60 @@
-# com.gameframex.unity.esotericsoftware.spine.spine-unity
+<div align="center">
 
-从Spine Unity 二次分发而来
+<img src="https://download.alianblank.com/gameframex/gameframex_logo_320.png" alt="GameFrameX Logo" width="160"/>
 
-# 基于 `Spine Runtime` 官方版本的二次包装
+# Game Frame X Spine-Unity Runtime
 
-该库主要服务于 `https://github.com/AlianBlank/GameFrameX` 作为子库使用。
+[![License](https://img.shields.io/github/license/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity)](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/blob/main/LICENSE)
+[![Version](https://img.shields.io/github/v/release/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity)](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/releases)
+[![Documentation](https://img.shields.io/badge/Documentation-Documentation-blue)](https://gameframex.doc.alianblank.com)
 
-# 使用方式(三种方式)
+All-in-One Solution for Indie Game Development · Empowering Indie Developers' Dreams
 
-1. 直接在 `manifest.json` 文件中添加以下内容
+[Documentation](https://gameframex.doc.alianblank.com) · [Quick Start](#quick-start) · [QQ Group](https://qm.qq.com/q/5kbDVBdUeS) · **Language**
+
+[English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
+
+</div>
+
+---
+
+## Project Overview
+
+A secondary distribution of the **Spine-Unity** runtime, repackaged from the official Spine Runtime. This library primarily serves as a sub-module for [GameFrameX](https://github.com/AlianBlank/GameFrameX).
+
+### Modifications from Official Version
+
+1. Added `link.xml` for strip filtering
+2. Added `SpineUnityCroppingHelper` anti-stripping script
+
+## Quick Start
+
+### Installation
+
+Choose one of the following methods:
+
+1. Add to `manifest.json` dependencies:
    ```json
-      {"com.gameframex.unity.esotericsoftware.spine.spine-unity": "https://github.com/AlianBlank/com.gameframex.unity.esotericsoftware.spine.spine-unity.git"}
-    ```
-2. 在Unity 的`Packages Manager` 中使用`Git URL` 的方式添加库,地址为：https://github.com/AlianBlank/com.gameframex.unity.esotericsoftware.spine.spine-unity.git
+   {
+      "com.gameframex.unity.esotericsoftware.spine.spine-unity": "https://github.com/AlianBlank/com.gameframex.unity.esotericsoftware.spine.spine-unity.git"
+   }
+   ```
+2. Use **Packages Manager** in Unity with **Git URL**: `https://github.com/AlianBlank/com.gameframex.unity.esotericsoftware.spine.spine-unity.git`
+3. Clone the repository into your Unity project's `Packages` directory. It will be loaded automatically.
 
-3. 直接下载仓库放置到Unity 项目的`Packages` 目录下。会自动加载识别
+## Documentation & Resources
 
-# 改动功能
+- [Spine-Unity Documentation](https://zh.esotericsoftware.com/spine-unity)
+- [GameFrameX Documentation](https://gameframex.doc.alianblank.com)
 
-1. 增加 `link.xml` 的裁剪过滤
-2. 增加 `SpineUnityCroppingHelper` 防裁剪脚本
+## Community & Support
 
-# Licensing
+- [QQ Group](https://qm.qq.com/q/5kbDVBdUeS)
 
-https://github.com/EsotericSoftware/spine-runtimes/blob/4.1/LICENSE
+## Changelog
 
-# 使用文档
+See [Releases](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/releases) for changelog.
 
-https://zh.esotericsoftware.com/spine-unity
+## License
+
+This project is licensed under the [Spine Runtime License](https://github.com/EsotericSoftware/spine-runtimes/blob/4.1/LICENSE).
