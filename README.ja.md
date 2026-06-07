@@ -12,7 +12,7 @@
 
 <br />
 
-[ドキュメント](https://gameframex.doc.alianblank.com) · [クイックスタート](#クイックスタート) · [QQグループ](https://qm.qq.com/q/5kbDVBdUeS)
+[ドキュメント](https://gameframex.doc.alianblank.com) · [クイックスタート](#クイックスタート) · QQグループ: 467608841 / 233840761
 
 <br />
 
@@ -48,7 +48,7 @@
 
 ## コミュニティとサポート
 
-- [QQグループ](https://qm.qq.com/q/5kbDVBdUeS)
+- QQグループ: 467608841 / 233840761
 
 ## 変更履歴
 
