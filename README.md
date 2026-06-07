@@ -62,7 +62,6 @@ Then add the package to `dependencies`:
 }
 ```
 
-
 ## Documentation & Resources
 
 - [Spine-Unity Documentation](https://zh.esotericsoftware.com/spine-unity)
@@ -78,4 +77,4 @@ See [Releases](https://github.com/gameframex/com.gameframex.unity.esotericsoftwa
 
 ## License
 
-This project is licensed under the [Spine Runtime License](https://github.com/EsotericSoftware/spine-runtimes/blob/4.1/LICENSE).
+See [LICENSE.md](LICENSE.md) for license information.

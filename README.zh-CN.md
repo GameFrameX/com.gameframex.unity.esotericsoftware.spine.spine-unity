@@ -62,7 +62,6 @@ Then add the package to `dependencies`:
 }
 ```
 
-
 ## 文档与资源
 
 - [Spine-Unity 使用文档](https://zh.esotericsoftware.com/spine-unity)
@@ -78,4 +77,4 @@ Then add the package to `dependencies`:
 
 ## 开源协议
 
-本项目基于 [Spine Runtime 许可协议](https://github.com/EsotericSoftware/spine-runtimes/blob/4.1/LICENSE) 开源。
+详见 [LICENSE.md](LICENSE.md) 文件。

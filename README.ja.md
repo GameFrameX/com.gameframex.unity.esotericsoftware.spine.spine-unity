@@ -62,7 +62,6 @@ Then add the package to `dependencies`:
 }
 ```
 
-
 ## ドキュメントとリソース
 
 - [Spine-Unity ドキュメント](https://zh.esotericsoftware.com/spine-unity)
@@ -78,4 +77,4 @@ Then add the package to `dependencies`:
 
 ## ライセンス
 
-このプロジェクトは [Spine Runtime ライセンス](https://github.com/EsotericSoftware/spine-runtimes/blob/4.1/LICENSE) の下で公開されています。
+詳しくは [LICENSE.md](LICENSE.md) をご参照ください。

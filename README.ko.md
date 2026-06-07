@@ -62,7 +62,6 @@ Then add the package to `dependencies`:
 }
 ```
 
-
 ## 문서 및 자료
 
 - [Spine-Unity 문서](https://zh.esotericsoftware.com/spine-unity)
@@ -78,4 +77,4 @@ Then add the package to `dependencies`:
 
 ## 라이선스
 
-이 프로젝트는 [Spine Runtime 라이선스](https://github.com/EsotericSoftware/spine-runtimes/blob/4.1/LICENSE)에 따라 배포됩니다.
+자세한 내용은 [LICENSE.md](LICENSE.md) 파일을 참조하세요.
