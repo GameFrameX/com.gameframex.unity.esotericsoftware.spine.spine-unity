@@ -75,6 +75,13 @@ Then add the package to `dependencies`:
 
 See [Releases](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/releases) for changelog.
 
+
+## Dependencies
+
+| Package | Description |
+|---------|-------------|
+| (无) | - |
+
 ## License
 
 See [LICENSE.md](LICENSE.md) for license information.

@@ -75,6 +75,13 @@ Then add the package to `dependencies`:
 
 查看 [Releases](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/releases) 了解更新日誌。
 
+
+## 依賴
+
+| 套件 | 說明 |
+|------|------|
+| (无) | - |
+
 ## 開源協議
 
 詳見 [LICENSE.md](LICENSE.md) 檔案。

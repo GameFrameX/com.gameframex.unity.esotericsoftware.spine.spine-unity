@@ -75,6 +75,13 @@ Then add the package to `dependencies`:
 
 変更履歴は [Releases](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/releases) をご覧ください。
 
+
+## 依存関係
+
+| パッケージ | 説明 |
+|----------|------|
+| (无) | - |
+
 ## ライセンス
 
 詳しくは [LICENSE.md](LICENSE.md) をご参照ください。
