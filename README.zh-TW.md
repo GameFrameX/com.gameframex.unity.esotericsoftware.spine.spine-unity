@@ -34,34 +34,36 @@
 
 ### 安裝
 
-編輯 Unity 專案的 `Packages/manifest.json`，添加 `scopedRegistries` 部分：
+選擇以下任一方式：
 
-```json
-{
-  "scopedRegistries": [
-    {
-      "name": "GameFrameX",
-      "url": "https://gameframex.upm.alianblank.uk",
-      "scopes": [
-        "com.gameframex"
-      ]
-    }
-  ]
-}
-```
+1. 編輯 Unity 專案的 `Packages/manifest.json`，添加 `scopedRegistries` 部分：
+   ```json
+   {
+     "scopedRegistries": [
+       {
+         "name": "GameFrameX",
+         "url": "https://gameframex.upm.alianblank.uk",
+         "scopes": [
+           "com.gameframex"
+         ]
+       }
+     ],
+     "dependencies": {
+       "com.gameframex.unity.esotericsoftware.spine.spine-unity": "3.9.0"
+     }
+   }
+   ```
 
-`scopes` 控制哪些套件透過此註冊表解析。只有以 `com.gameframex` 開頭的套件才會從這個註冊表取得。
+   `scopes` 控制哪些套件透過此註冊表解析。只有以 `com.gameframex` 開頭的套件才會從這個註冊表取得。
 
-Then add the package to `dependencies`:
-
-```json
-{
-  "dependencies": {
-    "com.gameframex.unity.esotericsoftware.spine.spine-unity": "3.9.0"
-  }
-}
-```
-
+2. 直接在 `manifest.json` 的 `dependencies` 節點下添加以下內容：
+   ```json
+   {
+      "com.gameframex.unity.esotericsoftware.spine.spine-unity": "https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity.git"
+   }
+   ```
+3. 在 Unity 的 `Package Manager` 中使用 `Git URL` 的方式添加庫，地址為：`https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity.git`
+4. 直接下載倉庫放置到 Unity 專案的 `Packages` 目錄下，會自動載入識別。
 ## 文檔與資源
 
 - [Spine-Unity 使用文檔](https://zh.esotericsoftware.com/spine-unity)
