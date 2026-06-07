@@ -34,5 +34,8 @@
     "name": "com.gameframex.unity.esotericsoftware.spine.spine-unity",
     "url": "git+https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity.git",
     "type": "git"
-  }
+  },
+  "documentationUrl": "https://gameframex.doc.alianblank.com",
+  "changelogUrl": "https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/blob/main/LICENSE.md"
 }
