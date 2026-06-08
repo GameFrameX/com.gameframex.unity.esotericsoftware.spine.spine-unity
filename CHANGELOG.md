@@ -1,3 +1,11 @@
+## [3.9.1](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.9.0...3.9.1) (2026-06-08)
+
+
+### Bug Fixes
+
+* 统一 LICENSE.md 为 Apache 2.0 (自有仓库) ([7048ddd](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/commit/7048ddd588ce7a4ddd9c41e052e25b528b786bfb))
+* 补全包规范文件（LICENSE/CHANGELOG/URL 字段/unity 字段） ([e573f4a](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/commit/e573f4a60a40bf0d17a24cc1d6293dcbfcbaa34e))
+
 # [3.9.0](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.8.6...3.9.0) (2025-12-23)
 
 
