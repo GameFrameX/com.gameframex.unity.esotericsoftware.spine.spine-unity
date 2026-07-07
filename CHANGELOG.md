@@ -1,3 +1,11 @@
+## [4.3.95](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.9.1...4.3.95) (2026-07-07)
+
+
+### Features
+
+* Update bundled spine-csharp/spine-unity runtime to official Spine 4.3.95 and spine-csharp 4.3.36.
+* Support Spine Editor 4.3 data exported from 4.3.74-beta or 4.3.00 (release) and newer.
+
 ## [3.9.1](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.9.0...3.9.1) (2026-06-08)
 
 

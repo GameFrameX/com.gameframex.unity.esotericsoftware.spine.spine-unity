@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,310 +27,203 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
+#if (UNITY_5 || UNITY_5_3_OR_NEWER || UNITY_WSA || UNITY_WP8 || UNITY_WP8_1)
+#define IS_UNITY
+#endif
+
 using System;
 
-namespace Spine
-{
-    /// <summary>Attachment that displays a texture region.</summary>
-    [UnityEngine.Scripting.Preserve]
-    public class RegionAttachment : Attachment, IHasRendererObject
-    {
-        [UnityEngine.Scripting.Preserve] public const int BLX = 0;
-        [UnityEngine.Scripting.Preserve] public const int BLY = 1;
-        [UnityEngine.Scripting.Preserve] public const int ULX = 2;
-        [UnityEngine.Scripting.Preserve] public const int ULY = 3;
-        [UnityEngine.Scripting.Preserve] public const int URX = 4;
-        [UnityEngine.Scripting.Preserve] public const int URY = 5;
-        [UnityEngine.Scripting.Preserve] public const int BRX = 6;
-        [UnityEngine.Scripting.Preserve] public const int BRY = 7;
+namespace Spine {
+#if IS_UNITY
+	using Color32F = UnityEngine.Color;
+#endif
 
-        internal float x, y, rotation, scaleX = 1, scaleY = 1, width, height;
-        internal float regionOffsetX, regionOffsetY, regionWidth, regionHeight, regionOriginalWidth, regionOriginalHeight;
-        internal float[] offset = new float[8], uvs = new float[8];
-        internal float r = 1, g = 1, b = 1, a = 1;
+	/// <summary>Attachment that displays a texture region.</summary>
+	public class RegionAttachment : Attachment, IHasSequence {
+		public const int BLX = 0, BLY = 1;
+		public const int ULX = 2, ULY = 3;
+		public const int URX = 4, URY = 5;
+		public const int BRX = 6, BRY = 7;
 
-        [UnityEngine.Scripting.Preserve]
-        public float X
-        {
-            get { return x; }
-            set { x = value; }
-        }
+		internal readonly Sequence sequence;
+		internal float x, y, rotation, scaleX = 1, scaleY = 1, width, height;
+		// Color is a struct, set to protected to prevent
+		// Color color = slot.color; color.a = 0.5;
+		// modifying just a copy of the struct instead of the original
+		// object as in reference implementation.
+		protected Color32F color = new Color32F(1, 1, 1, 1);
 
-        [UnityEngine.Scripting.Preserve]
-        public float Y
-        {
-            get { return y; }
-            set { y = value; }
-        }
+		public float X { get { return x; } set { x = value; } }
+		public float Y { get { return y; } set { y = value; } }
+		/// <summary>The local rotation in degrees, counter clockwise.</summary>
+		public float Rotation { get { return rotation; } set { rotation = value; } }
+		public float ScaleX { get { return scaleX; } set { scaleX = value; } }
+		public float ScaleY { get { return scaleY; } set { scaleY = value; } }
+		public float Width { get { return width; } set { width = value; } }
+		public float Height { get { return height; } set { height = value; } }
 
-        [UnityEngine.Scripting.Preserve]
-        public float Rotation
-        {
-            get { return rotation; }
-            set { rotation = value; }
-        }
+		public Color32F GetColor () {
+			return color;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float ScaleX
-        {
-            get { return scaleX; }
-            set { scaleX = value; }
-        }
+		public void SetColor (Color32F color) {
+			this.color = color;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float ScaleY
-        {
-            get { return scaleY; }
-            set { scaleY = value; }
-        }
+		public void SetColor (float r, float g, float b, float a) {
+			color = new Color32F(r, g, b, a);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float Width
-        {
-            get { return width; }
-            set { width = value; }
-        }
+		public string Path { get; set; }
+		public Sequence Sequence { get { return sequence; } }
 
-        [UnityEngine.Scripting.Preserve]
-        public float Height
-        {
-            get { return height; }
-            set { height = value; }
-        }
+		public RegionAttachment (string name, Sequence sequence)
+			: base(name) {
+			if (sequence == null) throw new ArgumentException("sequence cannot be null.", "sequence");
+			this.sequence = sequence;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float R
-        {
-            get { return r; }
-            set { r = value; }
-        }
+		/// <summary>Copy constructor.</summary>
+		public RegionAttachment (RegionAttachment other)
+			: base(other) {
+			Path = other.Path;
+			x = other.x;
+			y = other.y;
+			scaleX = other.scaleX;
+			scaleY = other.scaleY;
+			rotation = other.rotation;
+			width = other.width;
+			height = other.height;
+			color = other.color;
+			sequence = new Sequence(other.sequence);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float G
-        {
-            get { return g; }
-            set { g = value; }
-        }
+		/// <summary><para>
+		/// Transforms the attachment's four vertices to world coordinates. If the attachment has a <see cref="Sequence"/> the region may
+		/// be changed.</para>
+		/// <para>
+		/// See <see href='https://esotericsoftware.com/spine-runtime-skeletons#World-transforms'>World transforms</a> in the Spine
+		/// Runtimes Guide.</para></summary>
+		/// <param name="worldVertices">The output world vertices. Must have a length greater than or equal to offset + 8.</param>
+		/// <param name="vertexOffsets">The vertex <see cref="Sequence.GetOffsets(int)">offsets</see>.</param>
+		/// <param name="offset">The worldVertices index to begin writing values.</param>
+		/// <param name="stride">The number of worldVertices entries between the value pairs written.</param>
+		public void ComputeWorldVertices (Slot slot, float[] vertexOffsets, float[] worldVertices, int offset, int stride = 2) {
+			BonePose bone = slot.Bone.AppliedPose;
+			float bwx = bone.worldX, bwy = bone.worldY;
+			float a = bone.a, b = bone.b, c = bone.c, d = bone.d;
 
-        [UnityEngine.Scripting.Preserve]
-        public float B
-        {
-            get { return b; }
-            set { b = value; }
-        }
+			// Vertex order is different from RegionAttachment.java
+			float offsetX = vertexOffsets[BRX]; // 0
+			float offsetY = vertexOffsets[BRY]; // 1
+			worldVertices[offset] = offsetX * a + offsetY * b + bwx; // bl
+			worldVertices[offset + 1] = offsetX * c + offsetY * d + bwy;
+			offset += stride;
 
-        [UnityEngine.Scripting.Preserve]
-        public float A
-        {
-            get { return a; }
-            set { a = value; }
-        }
+			offsetX = vertexOffsets[BLX]; // 2
+			offsetY = vertexOffsets[BLY]; // 3
+			worldVertices[offset] = offsetX * a + offsetY * b + bwx; // ul
+			worldVertices[offset + 1] = offsetX * c + offsetY * d + bwy;
+			offset += stride;
 
-        [UnityEngine.Scripting.Preserve] public string Path { get; set; }
-        [UnityEngine.Scripting.Preserve] public object RendererObject { get; set; }
+			offsetX = vertexOffsets[ULX]; // 4
+			offsetY = vertexOffsets[ULY]; // 5
+			worldVertices[offset] = offsetX * a + offsetY * b + bwx; // ur
+			worldVertices[offset + 1] = offsetX * c + offsetY * d + bwy;
+			offset += stride;
 
-        [UnityEngine.Scripting.Preserve]
-        public float RegionOffsetX
-        {
-            get { return regionOffsetX; }
-            set { regionOffsetX = value; }
-        }
+			offsetX = vertexOffsets[URX]; // 6
+			offsetY = vertexOffsets[URY]; // 7
+			worldVertices[offset] = offsetX * a + offsetY * b + bwx; // br
+			worldVertices[offset + 1] = offsetX * c + offsetY * d + bwy;
+			//offset += stride;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float RegionOffsetY
-        {
-            get { return regionOffsetY; }
-            set { regionOffsetY = value; }
-        } // Pixels stripped from the bottom left, unrotated.
+		/// <summary>
+		/// Returns the vertex <see cref="Sequence.GetOffsets(int)">offsets</see> for the specified slot pose.
+		/// </summary>
+		public float[] GetOffsets (SlotPose pose) {
+			return sequence.GetOffsets(sequence.ResolveIndex(pose));
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float RegionWidth
-        {
-            get { return regionWidth; }
-            set { regionWidth = value; }
-        }
+		public void UpdateSequence () {
+			sequence.Update(this);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float RegionHeight
-        {
-            get { return regionHeight; }
-            set { regionHeight = value; }
-        } // Unrotated, stripped size.
+		public override Attachment Copy () {
+			return new RegionAttachment(this);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float RegionOriginalWidth
-        {
-            get { return regionOriginalWidth; }
-            set { regionOriginalWidth = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float RegionOriginalHeight
-        {
-            get { return regionOriginalHeight; }
-            set { regionOriginalHeight = value; }
-        } // Unrotated, unstripped size.
-
-        [UnityEngine.Scripting.Preserve]
-        public float[] Offset
-        {
-            get { return offset; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float[] UVs
-        {
-            get { return uvs; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public RegionAttachment(string name)
-            : base(name)
-        {
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public void UpdateOffset()
-        {
-            float width = this.width;
-            float height = this.height;
-            float localX2 = width * 0.5f;
-            float localY2 = height * 0.5f;
-            float localX = -localX2;
-            float localY = -localY2;
-            if (regionOriginalWidth != 0)
-            {
-                // if (region != null)
-                localX += regionOffsetX / regionOriginalWidth * width;
-                localY += regionOffsetY / regionOriginalHeight * height;
-                localX2 -= (regionOriginalWidth - regionOffsetX - regionWidth) / regionOriginalWidth * width;
-                localY2 -= (regionOriginalHeight - regionOffsetY - regionHeight) / regionOriginalHeight * height;
-            }
-
-            float scaleX = this.scaleX;
-            float scaleY = this.scaleY;
-            localX *= scaleX;
-            localY *= scaleY;
-            localX2 *= scaleX;
-            localY2 *= scaleY;
-            float rotation = this.rotation;
-            float cos = MathUtils.CosDeg(rotation);
-            float sin = MathUtils.SinDeg(rotation);
-            float x = this.x;
-            float y = this.y;
-            float localXCos = localX * cos + x;
-            float localXSin = localX * sin;
-            float localYCos = localY * cos + y;
-            float localYSin = localY * sin;
-            float localX2Cos = localX2 * cos + x;
-            float localX2Sin = localX2 * sin;
-            float localY2Cos = localY2 * cos + y;
-            float localY2Sin = localY2 * sin;
-            float[] offset = this.offset;
-            offset[BLX] = localXCos - localYSin;
-            offset[BLY] = localYCos + localXSin;
-            offset[ULX] = localXCos - localY2Sin;
-            offset[ULY] = localY2Cos + localXSin;
-            offset[URX] = localX2Cos - localY2Sin;
-            offset[URY] = localY2Cos + localX2Sin;
-            offset[BRX] = localX2Cos - localYSin;
-            offset[BRY] = localYCos + localX2Sin;
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public void SetUVs(float u, float v, float u2, float v2, bool rotate)
-        {
-            float[] uvs = this.uvs;
-            // UV values differ from RegionAttachment.java
-            if (rotate)
-            {
-                uvs[URX] = u;
-                uvs[URY] = v2;
-                uvs[BRX] = u;
-                uvs[BRY] = v;
-                uvs[BLX] = u2;
-                uvs[BLY] = v;
-                uvs[ULX] = u2;
-                uvs[ULY] = v2;
-            }
-            else
-            {
-                uvs[ULX] = u;
-                uvs[ULY] = v2;
-                uvs[URX] = u;
-                uvs[URY] = v;
-                uvs[BRX] = u2;
-                uvs[BRY] = v;
-                uvs[BLX] = u2;
-                uvs[BLY] = v2;
-            }
-        }
-
-        /// <summary>Transforms the attachment's four vertices to world coordinates.</summary>
-        /// <param name="bone">The parent bone.</param>
-        /// <param name="worldVertices">The output world vertices. Must have a length greater than or equal to offset + 8.</param>
-        /// <param name="offset">The worldVertices index to begin writing values.</param>
-        /// <param name="stride">The number of worldVertices entries between the value pairs written.</param>
-        [UnityEngine.Scripting.Preserve]
-        public void ComputeWorldVertices(Bone bone, float[] worldVertices, int offset, int stride = 2)
-        {
-            float[] vertexOffset = this.offset;
-            float bwx = bone.worldX, bwy = bone.worldY;
-            float a = bone.a, b = bone.b, c = bone.c, d = bone.d;
-            float offsetX, offsetY;
-
-            // Vertex order is different from RegionAttachment.java
-            offsetX = vertexOffset[BRX]; // 0
-            offsetY = vertexOffset[BRY]; // 1
-            worldVertices[offset] = offsetX * a + offsetY * b + bwx; // bl
-            worldVertices[offset + 1] = offsetX * c + offsetY * d + bwy;
-            offset += stride;
-
-            offsetX = vertexOffset[BLX]; // 2
-            offsetY = vertexOffset[BLY]; // 3
-            worldVertices[offset] = offsetX * a + offsetY * b + bwx; // ul
-            worldVertices[offset + 1] = offsetX * c + offsetY * d + bwy;
-            offset += stride;
-
-            offsetX = vertexOffset[ULX]; // 4
-            offsetY = vertexOffset[ULY]; // 5
-            worldVertices[offset] = offsetX * a + offsetY * b + bwx; // ur
-            worldVertices[offset + 1] = offsetX * c + offsetY * d + bwy;
-            offset += stride;
-
-            offsetX = vertexOffset[URX]; // 6
-            offsetY = vertexOffset[URY]; // 7
-            worldVertices[offset] = offsetX * a + offsetY * b + bwx; // br
-            worldVertices[offset + 1] = offsetX * c + offsetY * d + bwy;
-            //offset += stride;
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public override Attachment Copy()
-        {
-            RegionAttachment copy = new RegionAttachment(this.Name);
-            copy.RendererObject = RendererObject;
-            copy.regionOffsetX = regionOffsetX;
-            copy.regionOffsetY = regionOffsetY;
-            copy.regionWidth = regionWidth;
-            copy.regionHeight = regionHeight;
-            copy.regionOriginalWidth = regionOriginalWidth;
-            copy.regionOriginalHeight = regionOriginalHeight;
-            copy.Path = Path;
-            copy.x = x;
-            copy.y = y;
-            copy.scaleX = scaleX;
-            copy.scaleY = scaleY;
-            copy.rotation = rotation;
-            copy.width = width;
-            copy.height = height;
-            Array.Copy(uvs, 0, copy.uvs, 0, 8);
-            Array.Copy(offset, 0, copy.offset, 0, 8);
-            copy.r = r;
-            copy.g = g;
-            copy.b = b;
-            copy.a = a;
-            return copy;
-        }
-    }
+		/// <summary>
+		/// Computes <see cref="Sequence.GetUVs(int)">UVs</see> and <see cref="Sequence.GetOffsets(int)">offsets</see> for a region attachment.
+		/// </summary>
+		/// <param name="uvs">Output array for the computed UVs, length of 8.</param>
+		/// <param name="offset">Output array for the computed vertex offsets, length of 8.</param>
+		internal static void ComputeUVs (TextureRegion region, float x, float y, float scaleX, float scaleY, float rotation, float width,
+		float height, float[] offset, float[] uvs) {
+			float localX2 = width / 2, localY2 = height / 2;
+			float localX = -localX2, localY = -localY2;
+			bool rotated = false;
+			AtlasRegion r = region as AtlasRegion;
+			if (r != null) {
+				localX += r.offsetX / r.originalWidth * width;
+				localY += r.offsetY / r.originalHeight * height;
+				if (r.degrees == 90) {
+					rotated = true;
+					localX2 -= (r.originalWidth - r.offsetX - r.packedHeight) / r.originalWidth * width;
+					localY2 -= (r.originalHeight - r.offsetY - r.packedWidth) / r.originalHeight * height;
+				} else {
+					localX2 -= (r.originalWidth - r.offsetX - r.packedWidth) / r.originalWidth * width;
+					localY2 -= (r.originalHeight - r.offsetY - r.packedHeight) / r.originalHeight * height;
+				}
+			}
+			localX *= scaleX;
+			localY *= scaleY;
+			localX2 *= scaleX;
+			localY2 *= scaleY;
+			float rot = rotation * MathUtils.DegRad, cos = (float)Math.Cos(rot), sin = (float)Math.Sin(rot);
+			float localXCos = localX * cos + x;
+			float localXSin = localX * sin;
+			float localYCos = localY * cos + y;
+			float localYSin = localY * sin;
+			float localX2Cos = localX2 * cos + x;
+			float localX2Sin = localX2 * sin;
+			float localY2Cos = localY2 * cos + y;
+			float localY2Sin = localY2 * sin;
+			offset[BLX] = localXCos - localYSin;
+			offset[BLY] = localYCos + localXSin;
+			offset[ULX] = localXCos - localY2Sin;
+			offset[ULY] = localY2Cos + localXSin;
+			offset[URX] = localX2Cos - localY2Sin;
+			offset[URY] = localY2Cos + localX2Sin;
+			offset[BRX] = localX2Cos - localYSin;
+			offset[BRY] = localYCos + localX2Sin;
+			if (region == null) {
+				uvs[BLX] = 0;
+				uvs[BLY] = 0;
+				uvs[ULX] = 0;
+				uvs[ULY] = 1;
+				uvs[URX] = 1;
+				uvs[URY] = 1;
+				uvs[BRX] = 1;
+				uvs[BRY] = 0;
+			} else {
+				uvs[BLX] = region.u2;
+				uvs[ULY] = region.v2;
+				uvs[URX] = region.u;
+				uvs[BRY] = region.v;
+				if (rotated) {
+					uvs[BLY] = region.v;
+					uvs[ULX] = region.u2;
+					uvs[URY] = region.v2;
+					uvs[BRX] = region.u;
+				} else {
+					uvs[BLY] = region.v2;
+					uvs[ULX] = region.u;
+					uvs[URY] = region.v;
+					uvs[BRX] = region.u2;
+				}
+			}
+		}
+	}
 }

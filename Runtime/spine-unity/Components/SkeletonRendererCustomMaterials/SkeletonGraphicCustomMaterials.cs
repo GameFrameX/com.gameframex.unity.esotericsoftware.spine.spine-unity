@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -35,216 +35,235 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Spine.Unity
-{
+namespace Spine.Unity {
 #if NEW_PREFAB_SYSTEM
-    [ExecuteAlways]
+	[ExecuteAlways]
 #else
 	[ExecuteInEditMode]
 #endif
-    [HelpURL("http://esotericsoftware.com/spine-unity#SkeletonGraphicCustomMaterials")]
-    [UnityEngine.Scripting.Preserve]
-    public class SkeletonGraphicCustomMaterials : MonoBehaviour
-    {
-        #region Inspector
-
-        [UnityEngine.Scripting.Preserve] public SkeletonGraphic skeletonGraphic;
-        [SerializeField] protected List<AtlasMaterialOverride> customMaterialOverrides = new List<AtlasMaterialOverride>();
-        [SerializeField] protected List<AtlasTextureOverride> customTextureOverrides = new List<AtlasTextureOverride>();
+	[HelpURL("https://esotericsoftware.com/spine-unity-utility-components#SkeletonGraphicCustomMaterials")]
+	public class SkeletonGraphicCustomMaterials : MonoBehaviour {
+		#region Inspector
+		public SkeletonGraphic skeletonGraphic;
+		[SerializeField] protected List<SlotMaterialOverride> customSlotMaterials = new List<SlotMaterialOverride>();
+		[SerializeField] protected List<AtlasMaterialOverride> customMaterialOverrides = new List<AtlasMaterialOverride>();
+		[SerializeField] protected List<AtlasTextureOverride> customTextureOverrides = new List<AtlasTextureOverride>();
 
 #if UNITY_EDITOR
-        void Reset()
-        {
-            skeletonGraphic = GetComponent<SkeletonGraphic>();
+		void Reset () {
+			skeletonGraphic = GetComponent<SkeletonGraphic>();
 
-            // Populate material list
-            if (skeletonGraphic != null && skeletonGraphic.skeletonDataAsset != null)
-            {
-                var atlasAssets = skeletonGraphic.skeletonDataAsset.atlasAssets;
+			// Populate material list
+			if (skeletonGraphic != null && skeletonGraphic.skeletonDataAsset != null) {
+				AtlasAssetBase[] atlasAssets = skeletonGraphic.skeletonDataAsset.atlasAssets;
 
-                var initialAtlasMaterialOverrides = new List<AtlasMaterialOverride>();
-                foreach (AtlasAssetBase atlasAsset in atlasAssets)
-                {
-                    foreach (Material atlasMaterial in atlasAsset.Materials)
-                    {
-                        var atlasMaterialOverride = new AtlasMaterialOverride
-                        {
-                            overrideEnabled = false,
-                            originalTexture = atlasMaterial.mainTexture
-                        };
+				List<AtlasMaterialOverride> initialAtlasMaterialOverrides = new List<AtlasMaterialOverride>();
+				foreach (AtlasAssetBase atlasAsset in atlasAssets) {
+					foreach (Material atlasMaterial in atlasAsset.Materials) {
+						AtlasMaterialOverride atlasMaterialOverride = new AtlasMaterialOverride {
+							overrideEnabled = false,
+							originalTexture = atlasMaterial.mainTexture
+						};
 
-                        initialAtlasMaterialOverrides.Add(atlasMaterialOverride);
-                    }
-                }
+						initialAtlasMaterialOverrides.Add(atlasMaterialOverride);
+					}
+				}
+				customMaterialOverrides = initialAtlasMaterialOverrides;
+			}
 
-                customMaterialOverrides = initialAtlasMaterialOverrides;
-            }
+			// Populate texture list
+			if (skeletonGraphic != null && skeletonGraphic.skeletonDataAsset != null) {
+				AtlasAssetBase[] atlasAssets = skeletonGraphic.skeletonDataAsset.atlasAssets;
 
-            // Populate texture list
-            if (skeletonGraphic != null && skeletonGraphic.skeletonDataAsset != null)
-            {
-                var atlasAssets = skeletonGraphic.skeletonDataAsset.atlasAssets;
+				List<AtlasTextureOverride> initialAtlasTextureOverrides = new List<AtlasTextureOverride>();
+				foreach (AtlasAssetBase atlasAsset in atlasAssets) {
+					foreach (Material atlasMaterial in atlasAsset.Materials) {
+						AtlasTextureOverride atlasTextureOverride = new AtlasTextureOverride {
+							overrideEnabled = false,
+							originalTexture = atlasMaterial.mainTexture
+						};
 
-                var initialAtlasTextureOverrides = new List<AtlasTextureOverride>();
-                foreach (AtlasAssetBase atlasAsset in atlasAssets)
-                {
-                    foreach (Material atlasMaterial in atlasAsset.Materials)
-                    {
-                        var atlasTextureOverride = new AtlasTextureOverride
-                        {
-                            overrideEnabled = false,
-                            originalTexture = atlasMaterial.mainTexture
-                        };
-
-                        initialAtlasTextureOverrides.Add(atlasTextureOverride);
-                    }
-                }
-
-                customTextureOverrides = initialAtlasTextureOverrides;
-            }
-        }
+						initialAtlasTextureOverrides.Add(atlasTextureOverride);
+					}
+				}
+				customTextureOverrides = initialAtlasTextureOverrides;
+			}
+		}
 #endif
+		#endregion
 
-        #endregion
+		void SetCustomSlotMaterials () {
+			if (skeletonGraphic == null) {
+				Debug.LogError("skeletonRenderer == null");
+				return;
+			}
 
-        void SetCustomMaterialOverrides()
-        {
-            if (skeletonGraphic == null)
-            {
-                Debug.LogError("skeletonGraphic == null");
-                return;
-            }
+			for (int i = 0; i < customSlotMaterials.Count; i++) {
+				SlotMaterialOverride slotMaterialOverride = customSlotMaterials[i];
+				if (!slotMaterialOverride.overrideEnabled || string.IsNullOrEmpty(slotMaterialOverride.slotName))
+					continue;
 
-            for (int i = 0; i < customMaterialOverrides.Count; i++)
-            {
-                AtlasMaterialOverride atlasMaterialOverride = customMaterialOverrides[i];
-                if (atlasMaterialOverride.overrideEnabled)
-                    skeletonGraphic.CustomMaterialOverride[atlasMaterialOverride.originalTexture] = atlasMaterialOverride.replacementMaterial;
-            }
-        }
+				Slot slotObject = skeletonGraphic.skeleton.FindSlot(slotMaterialOverride.slotName);
+				if (slotObject != null)
+					skeletonGraphic.CustomSlotMaterials[slotObject] = slotMaterialOverride.material;
+			}
+		}
 
-        void RemoveCustomMaterialOverrides()
-        {
-            if (skeletonGraphic == null)
-            {
-                Debug.LogError("skeletonGraphic == null");
-                return;
-            }
+		void RemoveCustomSlotMaterials () {
+			if (skeletonGraphic == null) {
+				Debug.LogError("skeletonRenderer == null");
+				return;
+			}
 
-            for (int i = 0; i < customMaterialOverrides.Count; i++)
-            {
-                AtlasMaterialOverride atlasMaterialOverride = customMaterialOverrides[i];
-                Material currentMaterial;
+			for (int i = 0; i < customSlotMaterials.Count; i++) {
+				SlotMaterialOverride slotMaterialOverride = customSlotMaterials[i];
+				if (string.IsNullOrEmpty(slotMaterialOverride.slotName))
+					continue;
 
-                if (!skeletonGraphic.CustomMaterialOverride.TryGetValue(atlasMaterialOverride.originalTexture, out currentMaterial))
-                    continue;
+				Slot slotObject = skeletonGraphic.skeleton.FindSlot(slotMaterialOverride.slotName);
+				if (slotObject == null)
+					continue;
+				Material currentMaterial;
+				if (!skeletonGraphic.CustomSlotMaterials.TryGetValue(slotObject, out currentMaterial))
+					continue;
 
-                // Do not revert the material if it was changed by something else
-                if (currentMaterial != atlasMaterialOverride.replacementMaterial)
-                    continue;
+				// Do not revert the material if it was changed by something else
+				if (currentMaterial != slotMaterialOverride.material)
+					continue;
 
-                skeletonGraphic.CustomMaterialOverride.Remove(atlasMaterialOverride.originalTexture);
-            }
-        }
+				skeletonGraphic.CustomSlotMaterials.Remove(slotObject);
+			}
+		}
 
-        void SetCustomTextureOverrides()
-        {
-            if (skeletonGraphic == null)
-            {
-                Debug.LogError("skeletonGraphic == null");
-                return;
-            }
+		void SetCustomMaterialOverrides () {
+			if (skeletonGraphic == null) {
+				Debug.LogError("skeletonGraphic == null");
+				return;
+			}
 
-            for (int i = 0; i < customTextureOverrides.Count; i++)
-            {
-                AtlasTextureOverride atlasTextureOverride = customTextureOverrides[i];
-                if (atlasTextureOverride.overrideEnabled)
-                    skeletonGraphic.CustomTextureOverride[atlasTextureOverride.originalTexture] = atlasTextureOverride.replacementTexture;
-            }
-        }
+			for (int i = 0; i < customMaterialOverrides.Count; i++) {
+				AtlasMaterialOverride atlasMaterialOverride = customMaterialOverrides[i];
+				if (atlasMaterialOverride.overrideEnabled)
+					skeletonGraphic.CustomMaterialOverride[atlasMaterialOverride.originalTexture] = atlasMaterialOverride.replacementMaterial;
+			}
+		}
 
-        void RemoveCustomTextureOverrides()
-        {
-            if (skeletonGraphic == null)
-            {
-                Debug.LogError("skeletonGraphic == null");
-                return;
-            }
+		void RemoveCustomMaterialOverrides () {
+			if (skeletonGraphic == null) {
+				Debug.LogError("skeletonGraphic == null");
+				return;
+			}
 
-            for (int i = 0; i < customTextureOverrides.Count; i++)
-            {
-                AtlasTextureOverride atlasTextureOverride = customTextureOverrides[i];
-                Texture currentTexture;
+			for (int i = 0; i < customMaterialOverrides.Count; i++) {
+				AtlasMaterialOverride atlasMaterialOverride = customMaterialOverrides[i];
+				Material currentMaterial;
 
-                if (!skeletonGraphic.CustomTextureOverride.TryGetValue(atlasTextureOverride.originalTexture, out currentTexture))
-                    continue;
+				if (!skeletonGraphic.CustomMaterialOverride.TryGetValue(atlasMaterialOverride.originalTexture, out currentMaterial))
+					continue;
 
-                // Do not revert the material if it was changed by something else
-                if (currentTexture != atlasTextureOverride.replacementTexture)
-                    continue;
+				// Do not revert the material if it was changed by something else
+				if (currentMaterial != atlasMaterialOverride.replacementMaterial)
+					continue;
 
-                skeletonGraphic.CustomTextureOverride.Remove(atlasTextureOverride.originalTexture);
-            }
-        }
+				skeletonGraphic.CustomMaterialOverride.Remove(atlasMaterialOverride.originalTexture);
+			}
+		}
 
-        // OnEnable applies the overrides at runtime, and when the editor loads.
-        void OnEnable()
-        {
-            if (skeletonGraphic == null)
-                skeletonGraphic = GetComponent<SkeletonGraphic>();
+		void SetCustomTextureOverrides () {
+			if (skeletonGraphic == null) {
+				Debug.LogError("skeletonGraphic == null");
+				return;
+			}
 
-            if (skeletonGraphic == null)
-            {
-                Debug.LogError("skeletonGraphic == null");
-                return;
-            }
+			for (int i = 0; i < customTextureOverrides.Count; i++) {
+				AtlasTextureOverride atlasTextureOverride = customTextureOverrides[i];
+				if (atlasTextureOverride.overrideEnabled)
+					skeletonGraphic.CustomTextureOverride[atlasTextureOverride.originalTexture] = atlasTextureOverride.replacementTexture;
+			}
+		}
 
-            skeletonGraphic.Initialize(false);
-            SetCustomMaterialOverrides();
-            SetCustomTextureOverrides();
-        }
+		void RemoveCustomTextureOverrides () {
+			if (skeletonGraphic == null) {
+				Debug.LogError("skeletonGraphic == null");
+				return;
+			}
 
-        // OnDisable removes the overrides at runtime, and in the editor when the component is disabled or destroyed.
-        void OnDisable()
-        {
-            if (skeletonGraphic == null)
-            {
-                Debug.LogError("skeletonGraphic == null");
-                return;
-            }
+			for (int i = 0; i < customTextureOverrides.Count; i++) {
+				AtlasTextureOverride atlasTextureOverride = customTextureOverrides[i];
+				Texture currentTexture;
 
-            RemoveCustomMaterialOverrides();
-            RemoveCustomTextureOverrides();
-        }
+				if (!skeletonGraphic.CustomTextureOverride.TryGetValue(atlasTextureOverride.originalTexture, out currentTexture))
+					continue;
 
-        [Serializable]
-        [UnityEngine.Scripting.Preserve]
-        public struct AtlasMaterialOverride : IEquatable<AtlasMaterialOverride>
-        {
-            [UnityEngine.Scripting.Preserve] public bool overrideEnabled;
-            [UnityEngine.Scripting.Preserve] public Texture originalTexture;
-            [UnityEngine.Scripting.Preserve] public Material replacementMaterial;
+				// Do not revert the material if it was changed by something else
+				if (currentTexture != atlasTextureOverride.replacementTexture)
+					continue;
 
-            [UnityEngine.Scripting.Preserve]
-            public bool Equals(AtlasMaterialOverride other)
-            {
-                return overrideEnabled == other.overrideEnabled && originalTexture == other.originalTexture && replacementMaterial == other.replacementMaterial;
-            }
-        }
+				skeletonGraphic.CustomTextureOverride.Remove(atlasTextureOverride.originalTexture);
+			}
+		}
 
-        [Serializable]
-        [UnityEngine.Scripting.Preserve]
-        public struct AtlasTextureOverride : IEquatable<AtlasTextureOverride>
-        {
-            [UnityEngine.Scripting.Preserve] public bool overrideEnabled;
-            [UnityEngine.Scripting.Preserve] public Texture originalTexture;
-            [UnityEngine.Scripting.Preserve] public Texture replacementTexture;
+		// OnEnable applies the overrides at runtime, and when the editor loads.
+		void OnEnable () {
+			if (skeletonGraphic == null)
+				skeletonGraphic = GetComponent<SkeletonGraphic>();
 
-            [UnityEngine.Scripting.Preserve]
-            public bool Equals(AtlasTextureOverride other)
-            {
-                return overrideEnabled == other.overrideEnabled && originalTexture == other.originalTexture && replacementTexture == other.replacementTexture;
-            }
-        }
-    }
+			if (skeletonGraphic == null) {
+				Debug.LogError("skeletonGraphic == null");
+				return;
+			}
+
+			skeletonGraphic.Initialize(false);
+			SetCustomSlotMaterials();
+			SetCustomMaterialOverrides();
+			SetCustomTextureOverrides();
+		}
+
+		// OnDisable removes the overrides at runtime, and in the editor when the component is disabled or destroyed.
+		void OnDisable () {
+			if (skeletonGraphic == null) {
+				Debug.LogError("skeletonGraphic == null");
+				return;
+			}
+
+			RemoveCustomMaterialOverrides();
+			RemoveCustomTextureOverrides();
+			RemoveCustomSlotMaterials();
+		}
+
+		[Serializable]
+		public struct AtlasMaterialOverride : IEquatable<AtlasMaterialOverride> {
+			public bool overrideEnabled;
+			public Texture originalTexture;
+			public Material replacementMaterial;
+
+			public bool Equals (AtlasMaterialOverride other) {
+				return overrideEnabled == other.overrideEnabled && originalTexture == other.originalTexture && replacementMaterial == other.replacementMaterial;
+			}
+		}
+
+		[Serializable]
+		public struct AtlasTextureOverride : IEquatable<AtlasTextureOverride> {
+			public bool overrideEnabled;
+			public Texture originalTexture;
+			public Texture replacementTexture;
+
+			public bool Equals (AtlasTextureOverride other) {
+				return overrideEnabled == other.overrideEnabled && originalTexture == other.originalTexture && replacementTexture == other.replacementTexture;
+			}
+		}
+
+		[Serializable]
+		public struct SlotMaterialOverride : IEquatable<SlotMaterialOverride> {
+			public bool overrideEnabled;
+
+			[SpineSlot]
+			public string slotName;
+			public Material material;
+
+			public bool Equals (SlotMaterialOverride other) {
+				return overrideEnabled == other.overrideEnabled && slotName == other.slotName && material == other.material;
+			}
+		}
+	}
 }

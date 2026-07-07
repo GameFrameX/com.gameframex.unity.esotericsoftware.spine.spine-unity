@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -29,149 +29,61 @@
 
 using System;
 
-namespace Spine
-{
-    [UnityEngine.Scripting.Preserve]
-    public class BoneData
-    {
-        internal int index;
-        internal string name;
-        internal BoneData parent;
-        internal float length;
-        internal float x, y, rotation, scaleX = 1, scaleY = 1, shearX, shearY;
-        internal TransformMode transformMode = TransformMode.Normal;
-        internal bool skinRequired;
+namespace Spine {
 
-        /// <summary>The index of the bone in Skeleton.Bones</summary>
-        [UnityEngine.Scripting.Preserve]
-        public int Index
-        {
-            get { return index; }
-        }
+	/// <summary>
+	/// The setup pose for a bone.
+	/// </summary>
+	public class BoneData : PosedData<BonePose> {
+		internal int index;
+		internal BoneData parent;
+		internal float length;
 
-        /// <summary>The name of the bone, which is unique across all bones in the skeleton.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public string Name
-        {
-            get { return name; }
-        }
+		/// <param name="parent">May be null.</param>
+		public BoneData (int index, string name, BoneData parent)
+			: base(name, new BonePose()) {
 
-        /// <summary>May be null.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public BoneData Parent
-        {
-            get { return parent; }
-        }
+			if (index < 0) throw new ArgumentException("index must be >= 0", "index");
+			if (name == null) throw new ArgumentNullException("name", "name cannot be null.");
+			this.index = index;
+			this.parent = parent;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float Length
-        {
-            get { return length; }
-            set { length = value; }
-        }
+		/// <summary>Copy constructor.</summary>
+		/// <param name="parent">May be null.</param>
+		public BoneData (BoneData data, BoneData parent)
+			: this(data.index, data.name, parent) {
+			length = data.length;
+			setupPose.Set(data.setupPose);
+		}
 
-        /// <summary>Local X translation.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float X
-        {
-            get { return x; }
-            set { x = value; }
-        }
+		/// <summary>The <see cref="Skeleton.Bones"/> index.</summary>
+		public int Index { get { return index; } }
 
-        /// <summary>Local Y translation.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float Y
-        {
-            get { return y; }
-            set { y = value; }
-        }
+		/// <summary>May be null.</summary>
+		public BoneData Parent { get { return parent; } }
 
-        /// <summary>Local rotation.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float Rotation
-        {
-            get { return rotation; }
-            set { rotation = value; }
-        }
+		public float Length { get { return length; } set { length = value; } }
+	}
 
-        /// <summary>Local scaleX.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float ScaleX
-        {
-            get { return scaleX; }
-            set { scaleX = value; }
-        }
+	/// <summary>
+	/// Determines how a bone inherits world transforms from parent bones.
+	/// </summary>
+	public enum Inherit {
+		Normal,
+		OnlyTranslation,
+		NoRotationOrReflection,
+		NoScale,
+		NoScaleOrReflection
+	}
 
-        /// <summary>Local scaleY.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float ScaleY
-        {
-            get { return scaleY; }
-            set { scaleY = value; }
-        }
-
-        /// <summary>Local shearX.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float ShearX
-        {
-            get { return shearX; }
-            set { shearX = value; }
-        }
-
-        /// <summary>Local shearY.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float ShearY
-        {
-            get { return shearY; }
-            set { shearY = value; }
-        }
-
-        /// <summary>The transform mode for how parent world transforms affect this bone.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public TransformMode TransformMode
-        {
-            get { return transformMode; }
-            set { transformMode = value; }
-        }
-
-        ///<summary>When true, <see cref="Skeleton.UpdateWorldTransform()"/> only updates this bone if the <see cref="Skeleton.Skin"/> contains this
-        /// bone.</summary>
-        /// <seealso cref="Skin.Bones"/>
-        [UnityEngine.Scripting.Preserve]
-        public bool SkinRequired
-        {
-            get { return skinRequired; }
-            set { skinRequired = value; }
-        }
-
-        /// <param name="parent">May be null.</param>
-        [UnityEngine.Scripting.Preserve]
-        public BoneData(int index, string name, BoneData parent)
-        {
-            if (index < 0) throw new ArgumentException("index must be >= 0", "index");
-            if (name == null) throw new ArgumentNullException("name", "name cannot be null.");
-            this.index = index;
-            this.name = name;
-            this.parent = parent;
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        override
-            public string ToString()
-        {
-            return name;
-        }
-    }
-
-    [Flags]
-    [UnityEngine.Scripting.Preserve]
-    public enum TransformMode
-    {
-        //0000 0 Flip Scale Rotation
-        Normal = 0, // 0000
-        OnlyTranslation = 7, // 0111
-        NoRotationOrReflection = 1, // 0001
-        NoScale = 2, // 0010
-        NoScaleOrReflection = 6, // 0110
-    }
+	public class InheritEnum {
+		public static readonly Inherit[] Values = {
+			Inherit.Normal,
+			Inherit.OnlyTranslation,
+			Inherit.NoRotationOrReflection,
+			Inherit.NoScale,
+			Inherit.NoScaleOrReflection
+		};
+	}
 }

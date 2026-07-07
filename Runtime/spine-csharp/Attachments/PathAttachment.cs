@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -30,52 +30,36 @@
 using System;
 using System.Collections.Generic;
 
-namespace Spine
-{
-    [UnityEngine.Scripting.Preserve]
-    public class PathAttachment : VertexAttachment
-    {
-        internal float[] lengths;
-        internal bool closed, constantSpeed;
+namespace Spine {
+	public class PathAttachment : VertexAttachment {
+		internal float[] lengths;
+		internal bool closed, constantSpeed;
 
-        /// <summary>The length in the setup pose from the start of the path to the end of each curve.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float[] Lengths
-        {
-            get { return lengths; }
-            set { lengths = value; }
-        }
+		/// <summary>The length in the setup pose from the start of the path to the end of each curve.</summary>
+		public float[] Lengths { get { return lengths; } set { lengths = value; } }
+		/// <summary>If true, the start and end knots are connected.</summary>
+		public bool Closed { get { return closed; } set { closed = value; } }
+		/// <summary>If true, additional calculations are performed to make computing positions along the path more accurate so movement along
+		/// the path has a constant speed.</summary>
+		public bool ConstantSpeed { get { return constantSpeed; } set { constantSpeed = value; } }
 
-        [UnityEngine.Scripting.Preserve]
-        public bool Closed
-        {
-            get { return closed; }
-            set { closed = value; }
-        }
+		public PathAttachment (String name)
+			: base(name) {
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public bool ConstantSpeed
-        {
-            get { return constantSpeed; }
-            set { constantSpeed = value; }
-        }
+		/// <summary>Copy constructor.</summary>
+		protected PathAttachment (PathAttachment other)
+			: base(other) {
 
-        [UnityEngine.Scripting.Preserve]
-        public PathAttachment(String name)
-            : base(name)
-        {
-        }
+			lengths = new float[other.lengths.Length];
+			Array.Copy(other.lengths, 0, lengths, 0, lengths.Length);
 
-        [UnityEngine.Scripting.Preserve]
-        public override Attachment Copy()
-        {
-            PathAttachment copy = new PathAttachment(this.Name);
-            CopyTo(copy);
-            copy.lengths = new float[lengths.Length];
-            Array.Copy(lengths, 0, copy.lengths, 0, lengths.Length);
-            copy.closed = closed;
-            copy.constantSpeed = constantSpeed;
-            return copy;
-        }
-    }
+			closed = other.closed;
+			constantSpeed = other.constantSpeed;
+		}
+
+		public override Attachment Copy () {
+			return new PathAttachment(this);
+		}
+	}
 }

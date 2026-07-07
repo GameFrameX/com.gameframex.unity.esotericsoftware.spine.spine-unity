@@ -94,7 +94,7 @@ namespace Spine.Unity
         [UnityEngine.Scripting.Preserve]
         public static string GetCurrentAnimationName(this SkeletonAnimation skeletonAnimation)
         {
-            var currentEntry = skeletonAnimation.AnimationState.GetCurrent(0);
+            var currentEntry = skeletonAnimation.AnimationState.GetTrack(0);
             return currentEntry == null ? string.Empty : currentEntry.Animation.Name;
         }
 

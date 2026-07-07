@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -29,81 +29,43 @@
 
 using System;
 
-namespace Spine
-{
-    /// <summary>Stores the current pose values for an Event.</summary>
-    [UnityEngine.Scripting.Preserve]
-    public class Event
-    {
-        internal readonly EventData data;
-        internal readonly float time;
-        internal int intValue;
-        internal float floatValue;
-        internal string stringValue;
-        internal float volume;
-        internal float balance;
+namespace Spine {
+	/// <summary>Fired by <see cref="EventTimeline"/> when specific animation times are reached.
+	/// <para>See <see cref="Timeline.Apply(Skeleton, float, float, ExposedList{Event}, float, MixFrom, bool, bool, bool)"/> and
+	/// <a href="https://esotericsoftware.com/spine-events">Events</a> in the Spine User Guide.</para></summary>
+	public class Event {
+		internal readonly float time;
+		internal readonly EventData data;
+		internal int intValue;
+		internal float floatValue;
+		internal string stringValue;
+		internal float volume, balance;
 
-        [UnityEngine.Scripting.Preserve]
-        public EventData Data
-        {
-            get { return data; }
-        }
+		/// <summary>The event's setup pose data.</summary>
+		public EventData Data { get { return data; } }
+		/// <summary>The animation time this event was keyed, or -1 for the setup pose.</summary>
+		public float Time { get { return time; } }
 
-        /// <summary>The animation time this event was keyed.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public float Time
-        {
-            get { return time; }
-        }
+		/// <summary>The integer payload for this event.</summary>
+		public int Int { get { return intValue; } set { intValue = value; } }
+		/// <summary>The float payload for this event.</summary>
+		public float Float { get { return floatValue; } set { floatValue = value; } }
+		/// <summary>The string payload for this event.</summary>
+		public string String { get { return stringValue; } set { stringValue = value; } }
 
-        [UnityEngine.Scripting.Preserve]
-        public int Int
-        {
-            get { return intValue; }
-            set { intValue = value; }
-        }
+		/// <summary>If an audio path is set, the volume for the audio.</summary>
+		public float Volume { get { return volume; } set { volume = value; } }
+		/// <summary>If an audio path is set, the left/right balance for the audio.</summary>
+		public float Balance { get { return balance; } set { balance = value; } }
 
-        [UnityEngine.Scripting.Preserve]
-        public float Float
-        {
-            get { return floatValue; }
-            set { floatValue = value; }
-        }
+		public Event (float time, EventData data) {
+			if (data == null) throw new ArgumentNullException("data", "data cannot be null.");
+			this.time = time;
+			this.data = data;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public string String
-        {
-            get { return stringValue; }
-            set { stringValue = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float Volume
-        {
-            get { return volume; }
-            set { volume = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float Balance
-        {
-            get { return balance; }
-            set { balance = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public Event(float time, EventData data)
-        {
-            if (data == null) throw new ArgumentNullException("data", "data cannot be null.");
-            this.time = time;
-            this.data = data;
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        override
-            public string ToString()
-        {
-            return this.data.Name;
-        }
-    }
+		override public string ToString () {
+			return this.data.Name;
+		}
+	}
 }

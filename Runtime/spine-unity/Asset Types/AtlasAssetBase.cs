@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,25 +27,111 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-using System.Collections;
+#define SPINE_OPTIONAL_ON_DEMAND_LOADING
+
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Spine.Unity
-{
-    [UnityEngine.Scripting.Preserve]
-    public abstract class AtlasAssetBase : ScriptableObject
-    {
-        [UnityEngine.Scripting.Preserve] public abstract Material PrimaryMaterial { get; }
-        [UnityEngine.Scripting.Preserve] public abstract IEnumerable<Material> Materials { get; }
-        [UnityEngine.Scripting.Preserve] public abstract int MaterialCount { get; }
+namespace Spine.Unity {
+	public abstract class AtlasAssetBase : ScriptableObject {
+		public abstract Material PrimaryMaterial { get; }
+		public abstract IEnumerable<Material> Materials { get; }
+		public abstract int MaterialCount { get; }
 
-        [UnityEngine.Scripting.Preserve] public abstract bool IsLoaded { get; }
+		public abstract bool IsLoaded { get; }
+		public abstract void Clear ();
+		public abstract Atlas GetAtlas (bool onlyMetaData = false);
 
-        [UnityEngine.Scripting.Preserve]
-        public abstract void Clear();
+		protected void OnEnable () {
+			runtimeMaterialOverrides = null;
+			InitializeRuntimeOverrides();
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public abstract Atlas GetAtlas();
-    }
+		public bool HasMaterialOverrideSets {
+			get {
+#if UNITY_EDITOR
+				if (!Application.isPlaying) {
+					return serializedMaterialOverrides.Count > 0;
+				}
+#endif
+				return serializedMaterialOverrides.Count > 0 ||
+					(runtimeMaterialOverrides != null && runtimeMaterialOverrides.Count > 0);
+			}
+		}
+
+		public MaterialOverrideSet GetMaterialOverrideSet (string name) {
+#if UNITY_EDITOR
+			if (!Application.isPlaying) {
+				return serializedMaterialOverrides.Find(entry => (entry.name == name));
+			}
+#endif
+			InitializeRuntimeOverrides();
+			return runtimeMaterialOverrides.Find(entry => (entry.name == name));
+		}
+
+		public MaterialOverrideSet AddMaterialOverrideSet (string name) {
+
+			var overrideSet = new MaterialOverrideSet(name);
+#if UNITY_EDITOR
+			if (!Application.isPlaying) {
+				serializedMaterialOverrides.Add(overrideSet);
+				return overrideSet;
+			}
+#endif
+			InitializeRuntimeOverrides();
+			runtimeMaterialOverrides.Add(overrideSet);
+			return overrideSet;
+		}
+
+		protected void InitializeRuntimeOverrides () {
+			if (runtimeMaterialOverrides == null) {
+				runtimeMaterialOverrides = new List<MaterialOverrideSet>(serializedMaterialOverrides.Count);
+				foreach (var srcOverrideSet in serializedMaterialOverrides) {
+					runtimeMaterialOverrides.Add(new MaterialOverrideSet(srcOverrideSet));
+				}
+			}
+		}
+
+		[SerializeField] protected List<MaterialOverrideSet> serializedMaterialOverrides = new List<MaterialOverrideSet>();
+		protected List<MaterialOverrideSet> runtimeMaterialOverrides;
+
+#if SPINE_OPTIONAL_ON_DEMAND_LOADING
+		public enum LoadingMode {
+			Normal = 0,
+			OnDemand
+		}
+		public virtual LoadingMode TextureLoadingMode {
+			get { return textureLoadingMode; }
+			set { textureLoadingMode = value; }
+		}
+		public OnDemandTextureLoader OnDemandTextureLoader {
+			get { return onDemandTextureLoader; }
+			set { onDemandTextureLoader = value; }
+		}
+
+		public virtual void BeginCustomTextureLoading () {
+			if (onDemandTextureLoader)
+				onDemandTextureLoader.BeginCustomTextureLoading();
+		}
+
+		public virtual void EndCustomTextureLoading () {
+			if (onDemandTextureLoader)
+				onDemandTextureLoader.EndCustomTextureLoading();
+		}
+
+		public virtual void RequireTexturesLoaded (Material material, ref Material overrideMaterial) {
+			if (onDemandTextureLoader)
+				onDemandTextureLoader.RequestLoadMaterialTextures(material, ref overrideMaterial);
+		}
+
+		public virtual void RequireTextureLoaded (Texture placeholderTexture, ref Texture replacementTexture, System.Action<Texture> onTextureLoaded) {
+			if (onDemandTextureLoader)
+				onDemandTextureLoader.RequestLoadTexture(placeholderTexture, ref replacementTexture, onTextureLoaded);
+		}
+
+		[SerializeField] protected LoadingMode textureLoadingMode = LoadingMode.Normal;
+		[SerializeField] protected OnDemandTextureLoader onDemandTextureLoader = null;
+#endif
+	}
 }

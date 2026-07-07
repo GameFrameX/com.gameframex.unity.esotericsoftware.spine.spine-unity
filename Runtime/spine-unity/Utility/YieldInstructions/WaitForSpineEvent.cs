@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,180 +27,133 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-using UnityEngine;
-using System.Collections;
 using Spine;
+using System.Collections;
+using UnityEngine;
 
-namespace Spine.Unity
-{
-    /// <summary>
-    /// Use this as a condition-blocking yield instruction for Unity Coroutines.
-    /// The routine will pause until the AnimationState fires an event matching the given event name or EventData reference.</summary>
-    [UnityEngine.Scripting.Preserve]
-    public class WaitForSpineEvent : IEnumerator
-    {
-        Spine.EventData m_TargetEvent;
-        string m_EventName;
-        Spine.AnimationState m_AnimationState;
+namespace Spine.Unity {
+	/// <summary>
+	/// Use this as a condition-blocking yield instruction for Unity Coroutines.
+	/// The routine will pause until the AnimationState fires an event matching the given event name or EventData reference.</summary>
+	public class WaitForSpineEvent : IEnumerator {
 
-        bool m_WasFired = false;
-        bool m_unsubscribeAfterFiring = false;
+		Spine.EventData m_TargetEvent;
+		string m_EventName;
+		Spine.AnimationState m_AnimationState;
 
-        #region Constructors
+		bool m_WasFired = false;
+		bool m_unsubscribeAfterFiring = false;
 
-        void Subscribe(Spine.AnimationState state, Spine.EventData eventDataReference, bool unsubscribe)
-        {
-            if (state == null)
-            {
-                Debug.LogWarning("AnimationState argument was null. Coroutine will continue immediately.");
-                m_WasFired = true;
-                return;
-            }
-            else if (eventDataReference == null)
-            {
-                Debug.LogWarning("eventDataReference argument was null. Coroutine will continue immediately.");
-                m_WasFired = true;
-                return;
-            }
+		#region Constructors
+		void Subscribe (Spine.AnimationState state, Spine.EventData eventDataReference, bool unsubscribe) {
+			if (state == null) {
+				Debug.LogWarning("AnimationState argument was null. Coroutine will continue immediately.");
+				m_WasFired = true;
+				return;
+			} else if (eventDataReference == null) {
+				Debug.LogWarning("eventDataReference argument was null. Coroutine will continue immediately.");
+				m_WasFired = true;
+				return;
+			}
 
-            m_AnimationState = state;
-            m_TargetEvent = eventDataReference;
-            state.Event += HandleAnimationStateEvent;
+			m_AnimationState = state;
+			m_TargetEvent = eventDataReference;
+			state.Event += HandleAnimationStateEvent;
 
-            m_unsubscribeAfterFiring = unsubscribe;
-        }
+			m_unsubscribeAfterFiring = unsubscribe;
 
-        void SubscribeByName(Spine.AnimationState state, string eventName, bool unsubscribe)
-        {
-            if (state == null)
-            {
-                Debug.LogWarning("AnimationState argument was null. Coroutine will continue immediately.");
-                m_WasFired = true;
-                return;
-            }
-            else if (string.IsNullOrEmpty(eventName))
-            {
-                Debug.LogWarning("eventName argument was null. Coroutine will continue immediately.");
-                m_WasFired = true;
-                return;
-            }
+		}
 
-            m_AnimationState = state;
-            m_EventName = eventName;
-            state.Event += HandleAnimationStateEventByName;
+		void SubscribeByName (Spine.AnimationState state, string eventName, bool unsubscribe) {
+			if (state == null) {
+				Debug.LogWarning("AnimationState argument was null. Coroutine will continue immediately.");
+				m_WasFired = true;
+				return;
+			} else if (string.IsNullOrEmpty(eventName)) {
+				Debug.LogWarning("eventName argument was null. Coroutine will continue immediately.");
+				m_WasFired = true;
+				return;
+			}
 
-            m_unsubscribeAfterFiring = unsubscribe;
-        }
+			m_AnimationState = state;
+			m_EventName = eventName;
+			state.Event += HandleAnimationStateEventByName;
 
-        [UnityEngine.Scripting.Preserve]
-        public WaitForSpineEvent(Spine.AnimationState state, Spine.EventData eventDataReference, bool unsubscribeAfterFiring = true)
-        {
-            Subscribe(state, eventDataReference, unsubscribeAfterFiring);
-        }
+			m_unsubscribeAfterFiring = unsubscribe;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public WaitForSpineEvent(SkeletonAnimation skeletonAnimation, Spine.EventData eventDataReference, bool unsubscribeAfterFiring = true)
-        {
-            // If skeletonAnimation is invalid, its state will be null. Subscribe handles null states just fine.
-            Subscribe(skeletonAnimation.state, eventDataReference, unsubscribeAfterFiring);
-        }
+		public WaitForSpineEvent (Spine.AnimationState state, Spine.EventData eventDataReference, bool unsubscribeAfterFiring = true) {
+			Subscribe(state, eventDataReference, unsubscribeAfterFiring);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public WaitForSpineEvent(Spine.AnimationState state, string eventName, bool unsubscribeAfterFiring = true)
-        {
-            SubscribeByName(state, eventName, unsubscribeAfterFiring);
-        }
+		public WaitForSpineEvent (SkeletonAnimation skeletonAnimation, Spine.EventData eventDataReference, bool unsubscribeAfterFiring = true) {
+			// If skeletonAnimation is invalid, its state will be null. Subscribe handles null states just fine.
+			Subscribe(skeletonAnimation.AnimationState, eventDataReference, unsubscribeAfterFiring);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public WaitForSpineEvent(SkeletonAnimation skeletonAnimation, string eventName, bool unsubscribeAfterFiring = true)
-        {
-            // If skeletonAnimation is invalid, its state will be null. Subscribe handles null states just fine.
-            SubscribeByName(skeletonAnimation.state, eventName, unsubscribeAfterFiring);
-        }
+		public WaitForSpineEvent (Spine.AnimationState state, string eventName, bool unsubscribeAfterFiring = true) {
+			SubscribeByName(state, eventName, unsubscribeAfterFiring);
+		}
 
-        #endregion
+		public WaitForSpineEvent (SkeletonAnimation skeletonAnimation, string eventName, bool unsubscribeAfterFiring = true) {
+			// If skeletonAnimation is invalid, its state will be null. Subscribe handles null states just fine.
+			SubscribeByName(skeletonAnimation.AnimationState, eventName, unsubscribeAfterFiring);
+		}
+		#endregion
 
-        #region Event Handlers
+		#region Event Handlers
+		void HandleAnimationStateEventByName (Spine.TrackEntry trackEntry, Spine.Event e) {
+			m_WasFired |= (e.Data.Name == m_EventName);         // Check event name string match.
+			if (m_WasFired && m_unsubscribeAfterFiring)
+				m_AnimationState.Event -= HandleAnimationStateEventByName;  // Unsubscribe after correct event fires.
+		}
 
-        void HandleAnimationStateEventByName(Spine.TrackEntry trackEntry, Spine.Event e)
-        {
-            m_WasFired |= (e.Data.Name == m_EventName); // Check event name string match.
-            if (m_WasFired && m_unsubscribeAfterFiring)
-                m_AnimationState.Event -= HandleAnimationStateEventByName; // Unsubscribe after correct event fires.
-        }
+		void HandleAnimationStateEvent (Spine.TrackEntry trackEntry, Spine.Event e) {
+			m_WasFired |= (e.Data == m_TargetEvent);            // Check event data reference match.
+			if (m_WasFired && m_unsubscribeAfterFiring)
+				m_AnimationState.Event -= HandleAnimationStateEvent;        // Usubscribe after correct event fires.
+		}
+		#endregion
 
-        void HandleAnimationStateEvent(Spine.TrackEntry trackEntry, Spine.Event e)
-        {
-            m_WasFired |= (e.Data == m_TargetEvent); // Check event data reference match.
-            if (m_WasFired && m_unsubscribeAfterFiring)
-                m_AnimationState.Event -= HandleAnimationStateEvent; // Usubscribe after correct event fires.
-        }
+		#region Reuse
+		/// <summary>
+		/// By default, WaitForSpineEvent will unsubscribe from the event immediately after it fires a correct matching event.
+		/// If you want to reuse this WaitForSpineEvent instance on the same event, you can set this to false.</summary>
+		public bool WillUnsubscribeAfterFiring { get { return m_unsubscribeAfterFiring; } set { m_unsubscribeAfterFiring = value; } }
 
-        #endregion
+		public WaitForSpineEvent NowWaitFor (Spine.AnimationState state, Spine.EventData eventDataReference, bool unsubscribeAfterFiring = true) {
+			((IEnumerator)this).Reset();
+			Clear(state);
+			Subscribe(state, eventDataReference, unsubscribeAfterFiring);
 
-        #region Reuse
+			return this;
+		}
 
-        /// <summary>
-        /// By default, WaitForSpineEvent will unsubscribe from the event immediately after it fires a correct matching event.
-        /// If you want to reuse this WaitForSpineEvent instance on the same event, you can set this to false.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public bool WillUnsubscribeAfterFiring
-        {
-            get { return m_unsubscribeAfterFiring; }
-            set { m_unsubscribeAfterFiring = value; }
-        }
+		public WaitForSpineEvent NowWaitFor (Spine.AnimationState state, string eventName, bool unsubscribeAfterFiring = true) {
+			((IEnumerator)this).Reset();
+			Clear(state);
+			SubscribeByName(state, eventName, unsubscribeAfterFiring);
 
-        [UnityEngine.Scripting.Preserve]
-        public WaitForSpineEvent NowWaitFor(Spine.AnimationState state, Spine.EventData eventDataReference, bool unsubscribeAfterFiring = true)
-        {
-            ((IEnumerator)this).Reset();
-            Clear(state);
-            Subscribe(state, eventDataReference, unsubscribeAfterFiring);
+			return this;
+		}
 
-            return this;
-        }
+		void Clear (Spine.AnimationState state) {
+			state.Event -= HandleAnimationStateEvent;
+			state.Event -= HandleAnimationStateEventByName;
+		}
+		#endregion
 
-        [UnityEngine.Scripting.Preserve]
-        public WaitForSpineEvent NowWaitFor(Spine.AnimationState state, string eventName, bool unsubscribeAfterFiring = true)
-        {
-            ((IEnumerator)this).Reset();
-            Clear(state);
-            SubscribeByName(state, eventName, unsubscribeAfterFiring);
+		#region IEnumerator
+		bool IEnumerator.MoveNext () {
+			if (m_WasFired) {
+				((IEnumerator)this).Reset();    // auto-reset for YieldInstruction reuse
+				return false;
+			}
 
-            return this;
-        }
-
-        void Clear(Spine.AnimationState state)
-        {
-            state.Event -= HandleAnimationStateEvent;
-            state.Event -= HandleAnimationStateEventByName;
-        }
-
-        #endregion
-
-        #region IEnumerator
-
-        bool IEnumerator.MoveNext()
-        {
-            if (m_WasFired)
-            {
-                ((IEnumerator)this).Reset(); // auto-reset for YieldInstruction reuse
-                return false;
-            }
-
-            return true;
-        }
-
-        void IEnumerator.Reset()
-        {
-            m_WasFired = false;
-        }
-
-        object IEnumerator.Current
-        {
-            get { return null; }
-        }
-
-        #endregion
-    }
+			return true;
+		}
+		void IEnumerator.Reset () { m_WasFired = false; }
+		object IEnumerator.Current { get { return null; } }
+		#endregion
+	}
 }

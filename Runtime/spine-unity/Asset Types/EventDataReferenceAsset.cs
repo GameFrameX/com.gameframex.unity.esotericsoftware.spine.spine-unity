@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -31,48 +31,35 @@
 
 using UnityEngine;
 
-namespace Spine.Unity
-{
-    [CreateAssetMenu(menuName = "Spine/EventData Reference Asset", order = 100)]
-    [UnityEngine.Scripting.Preserve]
-    public class EventDataReferenceAsset : ScriptableObject
-    {
-        const bool QuietSkeletonData = true;
+namespace Spine.Unity {
+	[CreateAssetMenu(menuName = "Spine/EventData Reference Asset", order = 100)]
+	public class EventDataReferenceAsset : ScriptableObject {
+		const bool QuietSkeletonData = true;
 
-        [SerializeField] protected SkeletonDataAsset skeletonDataAsset;
+		[SerializeField] protected SkeletonDataAsset skeletonDataAsset;
+		[SerializeField, SpineEvent(dataField: "skeletonDataAsset")] protected string eventName;
 
-        [SerializeField, SpineEvent(dataField: "skeletonDataAsset")]
-        protected string eventName;
-
-        EventData eventData;
-
-        [UnityEngine.Scripting.Preserve]
-        public EventData EventData
-        {
-            get
-            {
+		EventData eventData;
+		public EventData EventData {
+			get {
 #if AUTOINIT_SPINEREFERENCE
-                if (eventData == null)
-                    Initialize();
+				if (eventData == null)
+					Initialize();
 #endif
-                return eventData;
-            }
-        }
+				return eventData;
+			}
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public void Initialize()
-        {
-            if (skeletonDataAsset == null)
-                return;
-            this.eventData = skeletonDataAsset.GetSkeletonData(EventDataReferenceAsset.QuietSkeletonData).FindEvent(eventName);
-            if (this.eventData == null)
-                Debug.LogWarningFormat("Event Data '{0}' not found in SkeletonData : {1}.", eventName, skeletonDataAsset.name);
-        }
+		public void Initialize () {
+			if (skeletonDataAsset == null)
+				return;
+			this.eventData = skeletonDataAsset.GetSkeletonData(EventDataReferenceAsset.QuietSkeletonData).FindEvent(eventName);
+			if (this.eventData == null)
+				Debug.LogWarningFormat("Event Data '{0}' not found in SkeletonData : {1}.", eventName, skeletonDataAsset.name);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public static implicit operator EventData(EventDataReferenceAsset asset)
-        {
-            return asset.EventData;
-        }
-    }
+		public static implicit operator EventData (EventDataReferenceAsset asset) {
+			return asset.EventData;
+		}
+	}
 }

@@ -143,7 +143,7 @@ namespace Spine.Unity
             allocatedRenderTextureSize = Vector2Int.zero;
         }
 
-        void RenderOntoQuad(SkeletonRenderer skeletonRenderer)
+        void RenderOntoQuad(ISkeletonRenderer skeletonRenderer)
         {
             if (meshFilter == null)
             {

@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -31,50 +31,59 @@
 
 using UnityEngine;
 
-namespace Spine.Unity
-{
-    [CreateAssetMenu(menuName = "Spine/Animation Reference Asset", order = 100)]
-    [UnityEngine.Scripting.Preserve]
-    public class AnimationReferenceAsset : ScriptableObject, IHasSkeletonDataAsset
-    {
-        const bool QuietSkeletonData = true;
+namespace Spine.Unity {
+	[CreateAssetMenu(menuName = "Spine/Animation Reference Asset", order = 100)]
+	public class AnimationReferenceAsset : ScriptableObject, IHasSkeletonDataAsset {
+		const bool QuietSkeletonData = true;
 
-        [SerializeField] protected SkeletonDataAsset skeletonDataAsset;
-        [SerializeField, SpineAnimation] protected string animationName;
-        private Animation animation;
+		[SerializeField] protected SkeletonDataAsset skeletonDataAsset;
+		[SerializeField, SpineAnimation] protected string animationName;
+		private Animation animation;
 
-        [UnityEngine.Scripting.Preserve]
-        public SkeletonDataAsset SkeletonDataAsset
-        {
-            get { return skeletonDataAsset; }
-        }
+		public SkeletonDataAsset SkeletonDataAsset {
+			get { return skeletonDataAsset; }
+			set { skeletonDataAsset = value; }
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public Animation Animation
-        {
-            get
-            {
+		public string AnimationName {
+			get {
+				return animationName;
+			}
+			set {
+				if (animationName == value)
+					return;
+				animationName = value;
 #if AUTOINIT_SPINEREFERENCE
-                if (animation == null)
-                    Initialize();
+				Initialize();
 #endif
+			}
+		}
 
-                return animation;
-            }
-        }
+		public Animation Animation {
+			get {
+#if AUTOINIT_SPINEREFERENCE
+				if (animation == null)
+					Initialize();
+#endif
+				return animation;
+			}
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public void Initialize()
-        {
-            if (skeletonDataAsset == null) return;
-            this.animation = skeletonDataAsset.GetSkeletonData(AnimationReferenceAsset.QuietSkeletonData).FindAnimation(animationName);
-            if (this.animation == null) Debug.LogWarningFormat("Animation '{0}' not found in SkeletonData : {1}.", animationName, skeletonDataAsset.name);
-        }
+		/// <summary>Clears the cached animation corresponding to a loaded SkeletonData object.
+		/// Use this to force a reload for the next time Animation is called.</summary>
+		public void Clear () {
+			animation = null;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public static implicit operator Animation(AnimationReferenceAsset asset)
-        {
-            return asset.Animation;
-        }
-    }
+		public void Initialize () {
+			if (skeletonDataAsset == null) return;
+			SkeletonData skeletonData = skeletonDataAsset.GetSkeletonData(AnimationReferenceAsset.QuietSkeletonData);
+			this.animation = skeletonData != null ? skeletonData.FindAnimation(animationName) : null;
+			if (this.animation == null) Debug.LogWarningFormat("Animation '{0}' not found in SkeletonData : {1}.", animationName, skeletonDataAsset.name);
+		}
+
+		public static implicit operator Animation (AnimationReferenceAsset asset) {
+			return asset.Animation;
+		}
+	}
 }

@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,110 +27,132 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
+using Spine;
 using UnityEditor;
 using UnityEngine;
-using Spine;
 
 namespace Spine.Unity.Editor {
+	using Event = UnityEngine.Event;
+	using Icons = SpineEditorUtilities.Icons;
 
 	[CustomEditor(typeof(SkeletonAnimation))]
 	[CanEditMultipleObjects]
-	public class SkeletonAnimationInspector : SkeletonRendererInspector {
-		protected SerializedProperty animationName, loop, timeScale, autoReset;
-		protected bool wasAnimationParameterChanged = false;
-		protected bool requireRepaint;
-		readonly GUIContent LoopLabel = new GUIContent("Loop", "Whether or not .AnimationName should loop. This only applies to the initial animation specified in the inspector, or any subsequent Animations played through .AnimationName. Animations set through state.SetAnimation are unaffected.");
-		readonly GUIContent TimeScaleLabel = new GUIContent("Time Scale", "The rate at which animations progress over time. 1 means normal speed. 0.5 means 50% speed.");
+	public class SkeletonAnimationInspector : UnityEditor.Editor {
 
-		protected override void OnEnable () {
-			base.OnEnable();
-			animationName = serializedObject.FindProperty("_animationName");
-			loop = serializedObject.FindProperty("loop");
-			timeScale = serializedObject.FindProperty("timeScale");
+		protected SerializedProperty updateTiming, animationName, loop, timeScale, unscaledTime, autoReset, threadedAnimation;
+		readonly GUIContent UpdateTimingLabel = new GUIContent("Animation Update",
+			"Whether to update the animation in normal Update (the default), " +
+			"physics step FixedUpdate, or manually via a user call.");
+		readonly GUIContent LoopLabel = new GUIContent("Loop",
+			"Whether or not .AnimationName should loop. This only applies to the initial " +
+			"animation specified in the inspector, or any subsequent Animations played through .AnimationName. " +
+			"Animations set through state.SetAnimation are unaffected.");
+		readonly GUIContent TimeScaleLabel = new GUIContent("Time Scale",
+			"The rate at which animations progress over time. 1 means normal speed. 0.5 means 50% speed.");
+		readonly GUIContent UnscaledTimeLabel = new GUIContent("Unscaled Time",
+			"When enabled, AnimationState uses unscaled game time (Time.unscaledDeltaTime), " +
+				"running animations independent of e.g. game pause (Time.timeScale). " +
+				"Instance SkeletonAnimation.timeScale will still be applied.");
+		readonly GUIContent ThreadedAnimationLabel = new GUIContent("Use Threading",
+			"When enabled, animations are processed on multiple threads in parallel.");
+
+		protected bool TargetIsValid {
+			get {
+				foreach (UnityEngine.Object o in targets) {
+					ISkeletonAnimation component = (ISkeletonAnimation)o;
+					if (!component.IsValid)
+						return false;
+				}
+				return true;
+			}
 		}
 
-		protected override void DrawInspectorGUI (bool multi) {
-			base.DrawInspectorGUI(multi);
-			if (!TargetIsValid) return;
+		protected void OnEnable () {
+			animationName = serializedObject.FindProperty("animationName");
+			loop = serializedObject.FindProperty("loop");
+			timeScale = serializedObject.FindProperty("timeScale");
+			unscaledTime = serializedObject.FindProperty("unscaledTime");
+			updateTiming = serializedObject.FindProperty("updateTiming");
+			threadedAnimation = serializedObject.FindProperty("threadedAnimation");
+		}
+
+		override public void OnInspectorGUI () {
+			DrawInspectorGUI();
+			serializedObject.ApplyModifiedProperties();
+		}
+
+		protected virtual void DrawInspectorGUI () {
+			foreach (UnityEngine.Object c in targets) {
+				ISkeletonAnimation component = c as ISkeletonAnimation;
+				if (!component.IsValid) {
+					SpineEditorUtilities.ReinitializeComponent(component);
+				}
+			}
+
 			bool sameData = SpineInspectorUtility.TargetsUseSameData(serializedObject);
-
-			foreach (var o in targets)
-				TrySetAnimation(o as SkeletonAnimation);
-
 			EditorGUILayout.Space();
 			if (!sameData) {
 				EditorGUILayout.DelayedTextField(animationName);
 			} else {
-				EditorGUI.BeginChangeCheck();
 				EditorGUILayout.PropertyField(animationName);
-				wasAnimationParameterChanged |= EditorGUI.EndChangeCheck(); // Value used in the next update.
 			}
 
-			EditorGUI.BeginChangeCheck();
 			EditorGUILayout.PropertyField(loop, LoopLabel);
-			wasAnimationParameterChanged |= EditorGUI.EndChangeCheck(); // Value used in the next update.
 			EditorGUILayout.PropertyField(timeScale, TimeScaleLabel);
-			foreach (var o in targets) {
-				var component = o as SkeletonAnimation;
+			foreach (UnityEngine.Object o in targets) {
+				SkeletonAnimation component = o as SkeletonAnimation;
 				component.timeScale = Mathf.Max(component.timeScale, 0);
+			}
+			EditorGUILayout.PropertyField(unscaledTime, UnscaledTimeLabel);
+			EditorGUILayout.PropertyField(updateTiming, UpdateTimingLabel);
+			EditorGUILayout.Space();
+
+			if (threadedAnimation != null) {
+				EditorGUILayout.LabelField(SpineInspectorUtility.TempContent("Threaded Animation", SpineEditorUtilities.Icons.subMeshRenderer), EditorStyles.boldLabel);
+				EditorGUILayout.PropertyField(threadedAnimation, ThreadedAnimationLabel);
+				EditorGUILayout.Space();
 			}
 
 			EditorGUILayout.Space();
 			SkeletonRootMotionParameter();
-
-			serializedObject.ApplyModifiedProperties();
-
-			if (!isInspectingPrefab) {
-				if (requireRepaint) {
-					UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
-					requireRepaint = false;
-				}
-			}
 		}
 
-		protected void TrySetAnimation (SkeletonAnimation skeletonAnimation) {
-			if (skeletonAnimation == null) return;
-			if (!skeletonAnimation.valid || skeletonAnimation.AnimationState == null)
-				return;
+		protected void SkeletonRootMotionParameter () {
+			SkeletonRootMotionParameter(targets);
+		}
 
-			TrackEntry current = skeletonAnimation.AnimationState.GetCurrent(0);
-			if (!isInspectingPrefab) {
-				string activeAnimation = (current != null) ? current.Animation.Name : "";
-				bool activeLoop = (current != null) ? current.Loop : false;
-				bool animationParameterChanged = this.wasAnimationParameterChanged &&
-					((activeAnimation != animationName.stringValue) || (activeLoop != loop.boolValue));
-				if (animationParameterChanged) {
-					this.wasAnimationParameterChanged = false;
-					var skeleton = skeletonAnimation.Skeleton;
-					var state = skeletonAnimation.AnimationState;
+		public static void SkeletonRootMotionParameter (Object[] targets) {
+			int rootMotionComponentCount = 0;
+			foreach (UnityEngine.Object t in targets) {
+				Component component = t as Component;
+				if (component.GetComponent<SkeletonRootMotion>() != null) {
+					++rootMotionComponentCount;
+				}
+			}
+			bool allHaveRootMotion = rootMotionComponentCount == targets.Length;
+			bool anyHaveRootMotion = rootMotionComponentCount > 0;
 
-					if (!Application.isPlaying) {
-						if (state != null) state.ClearTrack(0);
-						skeleton.SetToSetupPose();
-					}
-
-					Spine.Animation animationToUse = skeleton.Data.FindAnimation(animationName.stringValue);
-
-					if (!Application.isPlaying) {
-						if (animationToUse != null) {
-							skeletonAnimation.AnimationState.SetAnimation(0, animationToUse, loop.boolValue);
+			using (new GUILayout.HorizontalScope()) {
+				EditorGUILayout.PrefixLabel("Root Motion");
+				if (!allHaveRootMotion) {
+					if (GUILayout.Button(SpineInspectorUtility.TempContent("Add Component", Icons.constraintTransform), GUILayout.MaxWidth(130), GUILayout.Height(18))) {
+						foreach (UnityEngine.Object t in targets) {
+							Component component = t as Component;
+							if (component.GetComponent<SkeletonRootMotion>() == null) {
+								component.gameObject.AddComponent<SkeletonRootMotion>();
+							}
 						}
-						skeletonAnimation.Update(0);
-						skeletonAnimation.LateUpdate();
-						requireRepaint = true;
-					} else {
-						if (animationToUse != null)
-							state.SetAnimation(0, animationToUse, loop.boolValue);
-						else
-							state.ClearTrack(0);
 					}
 				}
-
-				// Reflect animationName serialized property in the inspector even if SetAnimation API was used.
-				if (Application.isPlaying) {
-					if (current != null && current.Animation != null) {
-						if (skeletonAnimation.AnimationName != animationName.stringValue)
-							animationName.stringValue = current.Animation.Name;
+				if (anyHaveRootMotion) {
+					if (GUILayout.Button(SpineInspectorUtility.TempContent("Remove Component", Icons.constraintTransform), GUILayout.MaxWidth(140), GUILayout.Height(18))) {
+						foreach (UnityEngine.Object t in targets) {
+							Component component = t as Component;
+							SkeletonRootMotion rootMotionComponent = component.GetComponent<SkeletonRootMotion>();
+							if (rootMotionComponent != null) {
+								DestroyImmediate(rootMotionComponent);
+							}
+						}
 					}
 				}
 			}
