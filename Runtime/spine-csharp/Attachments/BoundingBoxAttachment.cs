@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -29,24 +29,20 @@
 
 using System;
 
-namespace Spine
-{
-    /// <summary>Attachment that has a polygon for bounds checking.</summary>
-    [UnityEngine.Scripting.Preserve]
-    public class BoundingBoxAttachment : VertexAttachment
-    {
-        [UnityEngine.Scripting.Preserve]
-        public BoundingBoxAttachment(string name)
-            : base(name)
-        {
-        }
+namespace Spine {
+	/// <summary>Attachment that has a polygon for bounds checking.</summary>
+	public class BoundingBoxAttachment : VertexAttachment {
+		public BoundingBoxAttachment (string name)
+			: base(name) {
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public override Attachment Copy()
-        {
-            BoundingBoxAttachment copy = new BoundingBoxAttachment(this.Name);
-            CopyTo(copy);
-            return copy;
-        }
-    }
+		/// <summary>Copy constructor.</summary>
+		protected BoundingBoxAttachment (BoundingBoxAttachment other)
+			: base(other) {
+		}
+
+		public override Attachment Copy () {
+			return new BoundingBoxAttachment(this);
+		}
+	}
 }

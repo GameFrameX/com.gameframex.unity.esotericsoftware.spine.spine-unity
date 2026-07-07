@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,75 +27,96 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
+#if !SPINE_AUTO_UPGRADE_COMPONENTS_OFF
+#define AUTO_UPGRADE_TO_43_COMPONENTS
+#endif
+
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace Spine.Unity
-{
-    /// <summary>
-    /// Utility component to support flipping of 2D hinge chains (chains of HingeJoint2D objects) along
-    /// with the parent skeleton by activating the respective mirrored versions of the hinge chain.
-    /// Note: This component is automatically attached when calling "Create Hinge Chain 2D" at <see cref="SkeletonUtilityBone"/>,
-    /// do not attempt to use this component for other purposes.
-    /// </summary>
-    [UnityEngine.Scripting.Preserve]
-    public class ActivateBasedOnFlipDirection : MonoBehaviour
-    {
-        [UnityEngine.Scripting.Preserve] public SkeletonRenderer skeletonRenderer;
-        [UnityEngine.Scripting.Preserve] public SkeletonGraphic skeletonGraphic;
-        [UnityEngine.Scripting.Preserve] public GameObject activeOnNormalX;
-        [UnityEngine.Scripting.Preserve] public GameObject activeOnFlippedX;
-        HingeJoint2D[] jointsNormalX;
-        HingeJoint2D[] jointsFlippedX;
-        ISkeletonComponent skeletonComponent;
+namespace Spine.Unity {
 
-        bool wasFlippedXBefore = false;
+	/// <summary>
+	/// Utility component to support flipping of 2D hinge chains (chains of HingeJoint2D objects) along
+	/// with the parent skeleton by activating the respective mirrored versions of the hinge chain.
+	/// Note: This component is automatically attached when calling "Create Hinge Chain 2D" at <see cref="SkeletonUtilityBone"/>,
+	/// do not attempt to use this component for other purposes.
+	/// </summary>
+	public class ActivateBasedOnFlipDirection : MonoBehaviour, IUpgradable {
 
-        private void Start()
-        {
-            jointsNormalX = activeOnNormalX.GetComponentsInChildren<HingeJoint2D>();
-            jointsFlippedX = activeOnFlippedX.GetComponentsInChildren<HingeJoint2D>();
-            skeletonComponent = skeletonRenderer != null ? (ISkeletonComponent)skeletonRenderer : (ISkeletonComponent)skeletonGraphic;
-        }
+		public SkeletonRenderer skeletonRenderer;
+		public SkeletonGraphic skeletonGraphic;
+		public GameObject activeOnNormalX;
+		public GameObject activeOnFlippedX;
+		HingeJoint2D[] jointsNormalX;
+		HingeJoint2D[] jointsFlippedX;
+		ISkeletonComponent skeletonComponent;
 
-        private void FixedUpdate()
-        {
-            bool isFlippedX = (skeletonComponent.Skeleton.ScaleX < 0);
-            if (isFlippedX != wasFlippedXBefore)
-            {
-                HandleFlip(isFlippedX);
-            }
+		bool wasFlippedXBefore = false;
 
-            wasFlippedXBefore = isFlippedX;
-        }
+#if UNITY_EDITOR && AUTO_UPGRADE_TO_43_COMPONENTS
+		protected void Awake () {
+			if (!Application.isPlaying && !wasUpgradedTo43) {
+				UpgradeTo43();
+			}
+		}
+#endif
 
-        void HandleFlip(bool isFlippedX)
-        {
-            GameObject gameObjectToActivate = isFlippedX ? activeOnFlippedX : activeOnNormalX;
-            GameObject gameObjectToDeactivate = isFlippedX ? activeOnNormalX : activeOnFlippedX;
+		private void Start () {
+			jointsNormalX = activeOnNormalX.GetComponentsInChildren<HingeJoint2D>();
+			jointsFlippedX = activeOnFlippedX.GetComponentsInChildren<HingeJoint2D>();
+			skeletonComponent = skeletonRenderer != null ? (ISkeletonComponent)skeletonRenderer : (ISkeletonComponent)skeletonGraphic;
+		}
 
-            gameObjectToActivate.SetActive(true);
-            gameObjectToDeactivate.SetActive(false);
+		private void FixedUpdate () {
+			bool isFlippedX = (skeletonComponent.Skeleton.ScaleX < 0);
+			if (isFlippedX != wasFlippedXBefore) {
+				HandleFlip(isFlippedX);
+			}
+			wasFlippedXBefore = isFlippedX;
+		}
 
-            ResetJointPositions(isFlippedX ? jointsFlippedX : jointsNormalX);
-            ResetJointPositions(isFlippedX ? jointsNormalX : jointsFlippedX);
-            CompensateMovementAfterFlipX(gameObjectToActivate.transform, gameObjectToDeactivate.transform);
-        }
+		void HandleFlip (bool isFlippedX) {
+			GameObject gameObjectToActivate = isFlippedX ? activeOnFlippedX : activeOnNormalX;
+			GameObject gameObjectToDeactivate = isFlippedX ? activeOnNormalX : activeOnFlippedX;
 
-        void ResetJointPositions(HingeJoint2D[] joints)
-        {
-            for (int i = 0; i < joints.Length; ++i)
-            {
-                var joint = joints[i];
-                var parent = joint.connectedBody.transform;
-                joint.transform.position = parent.TransformPoint(joint.connectedAnchor);
-            }
-        }
+			gameObjectToActivate.SetActive(true);
+			gameObjectToDeactivate.SetActive(false);
 
-        void CompensateMovementAfterFlipX(Transform toActivate, Transform toDeactivate)
-        {
-            Transform targetLocation = toDeactivate.GetChild(0);
-            Transform currentLocation = toActivate.GetChild(0);
-            toActivate.position += targetLocation.position - currentLocation.position;
-        }
-    }
+			ResetJointPositions(isFlippedX ? jointsFlippedX : jointsNormalX);
+			ResetJointPositions(isFlippedX ? jointsNormalX : jointsFlippedX);
+			CompensateMovementAfterFlipX(gameObjectToActivate.transform, gameObjectToDeactivate.transform);
+		}
+
+		void ResetJointPositions (HingeJoint2D[] joints) {
+			for (int i = 0; i < joints.Length; ++i) {
+				HingeJoint2D joint = joints[i];
+				Transform parent = joint.connectedBody.transform;
+				joint.transform.position = parent.TransformPoint(joint.connectedAnchor);
+			}
+		}
+
+		void CompensateMovementAfterFlipX (Transform toActivate, Transform toDeactivate) {
+			Transform targetLocation = toDeactivate.GetChild(0);
+			Transform currentLocation = toActivate.GetChild(0);
+			toActivate.position += targetLocation.position - currentLocation.position;
+		}
+
+		#region Transfer of Deprecated Fields
+#if UNITY_EDITOR && AUTO_UPGRADE_TO_43_COMPONENTS
+		public virtual void UpgradeTo43 () {
+			wasUpgradedTo43 = true;
+			if (skeletonRenderer == null && skeletonGraphic == null) {
+				Component previousReference = previousSkeletonRenderer != null ? previousSkeletonRenderer : this;
+				skeletonRenderer = previousReference.GetComponent<SkeletonRenderer>();
+				if (skeletonRenderer == null)
+					Debug.LogError("Please manually re-assign SkeletonRenderer at ActivateBasedOnFlipDirection, " +
+						"automatic upgrade failed.", this);
+			}
+		}
+		[SerializeField, HideInInspector, FormerlySerializedAs("skeletonRenderer")] Component previousSkeletonRenderer;
+		[SerializeField] protected bool wasUpgradedTo43 = false;
+#endif
+		#endregion
+	}
 }

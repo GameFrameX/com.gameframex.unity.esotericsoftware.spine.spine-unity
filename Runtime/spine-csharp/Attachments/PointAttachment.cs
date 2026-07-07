@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,70 +27,52 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-namespace Spine
-{
-    /// <summary>
-    /// An attachment which is a single point and a rotation. This can be used to spawn projectiles, particles, etc. A bone can be
-    /// used in similar ways, but a PointAttachment is slightly less expensive to compute and can be hidden, shown, and placed in a
-    /// skin.
-    /// <p>
-    /// See <a href="http://esotericsoftware.com/spine-point-attachments">Point Attachments</a> in the Spine User Guide.
-    /// </summary>
-    [UnityEngine.Scripting.Preserve]
-    public class PointAttachment : Attachment
-    {
-        internal float x, y, rotation;
+using System;
 
-        [UnityEngine.Scripting.Preserve]
-        public float X
-        {
-            get { return x; }
-            set { x = value; }
-        }
+namespace Spine {
+	/// <summary>
+	/// An attachment which is a single point and a rotation. This can be used to spawn projectiles, particles, etc. A bone can be
+	/// used in similar ways, but a PointAttachment is slightly less expensive to compute and can be hidden, shown, and placed in a
+	/// skin.
+	/// <p>
+	/// See <a href="https://esotericsoftware.com/spine-points">Point Attachments</a> in the Spine User Guide.
+	/// </summary>
+	public class PointAttachment : Attachment {
+		internal float x, y, rotation;
+		/// <summary>The local x position.</summary>
+		public float X { get { return x; } set { x = value; } }
+		/// <summary>The local y position.</summary>
+		public float Y { get { return y; } set { y = value; } }
+		/// <summary>The local rotation in degrees, counter clockwise.</summary>
+		public float Rotation { get { return rotation; } set { rotation = value; } }
 
-        [UnityEngine.Scripting.Preserve]
-        public float Y
-        {
-            get { return y; }
-            set { y = value; }
-        }
+		public PointAttachment (string name)
+			: base(name) {
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float Rotation
-        {
-            get { return rotation; }
-            set { rotation = value; }
-        }
+		/// <summary>Copy constructor.</summary>
+		protected PointAttachment (PointAttachment other)
+			: base(other) {
+			x = other.x;
+			y = other.y;
+			rotation = other.rotation;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public PointAttachment(string name)
-            : base(name)
-        {
-        }
+		/// <summary>Computes the world position from the local position.</summary>
+		public void ComputeWorldPosition (BonePose bone, out float ox, out float oy) {
+			bone.LocalToWorld(this.x, this.y, out ox, out oy);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public void ComputeWorldPosition(Bone bone, out float ox, out float oy)
-        {
-            bone.LocalToWorld(this.x, this.y, out ox, out oy);
-        }
+		/// <summary>Computes the world rotation from the local rotation.</summary>
+		public float ComputeWorldRotation (BonePose bone) {
+			float r = rotation * MathUtils.DegRad, cos = (float)Math.Cos(r), sin = (float)Math.Sin(r);
+			float x = cos * bone.a + sin * bone.b;
+			float y = cos * bone.c + sin * bone.d;
+			return MathUtils.Atan2Deg(y, x);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public float ComputeWorldRotation(Bone bone)
-        {
-            float cos = MathUtils.CosDeg(rotation), sin = MathUtils.SinDeg(rotation);
-            float ix = cos * bone.a + sin * bone.b;
-            float iy = cos * bone.c + sin * bone.d;
-            return MathUtils.Atan2(iy, ix) * MathUtils.RadDeg;
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public override Attachment Copy()
-        {
-            PointAttachment copy = new PointAttachment(this.Name);
-            copy.x = x;
-            copy.y = y;
-            copy.rotation = rotation;
-            return copy;
-        }
-    }
+		public override Attachment Copy () {
+			return new PointAttachment(this);
+		}
+	}
 }

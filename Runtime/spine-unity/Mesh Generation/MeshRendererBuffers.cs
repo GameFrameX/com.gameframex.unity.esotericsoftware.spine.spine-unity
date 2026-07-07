@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,140 +27,120 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-// Not for optimization. Do not disable.
-
-#define SPINE_TRIANGLECHECK // Avoid calling SetTriangles at the cost of checking for mesh differences (vertex counts, memberwise attachment list compare) every frame.
+// Optimization option: Allows faster BuildMeshWithArrays call and avoids calling SetTriangles at the cost of
+// checking for mesh differences (vertex counts, member-wise attachment list compare) every frame.
+#define SPINE_TRIANGLECHECK
 //#define SPINE_DEBUG
 
-using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
-namespace Spine.Unity
-{
-    /// <summary>A double-buffered Mesh, and a shared material array, bundled for use by Spine components that need to push a Mesh and materials to a Unity MeshRenderer and MeshFilter.</summary>
-    [UnityEngine.Scripting.Preserve]
-    public class MeshRendererBuffers : IDisposable
-    {
-        DoubleBuffered<SmartMesh> doubleBufferedMesh;
-        internal readonly ExposedList<Material> submeshMaterials = new ExposedList<Material>();
-        internal Material[] sharedMaterials = new Material[0];
+namespace Spine.Unity {
+	/// <summary>A double-buffered Mesh, and a shared material array, bundled for use by Spine components that need to push a Mesh and materials to a Unity MeshRenderer and MeshFilter.</summary>
+	public class MeshRendererBuffers : IDisposable {
+		DoubleBuffered<SmartMesh> doubleBufferedMesh;
+		internal readonly ExposedList<Material> submeshMaterials = new ExposedList<Material>();
+		internal Material[] sharedMaterials = new Material[0];
+		internal int previousMaterialHash = 0;
 
-        [UnityEngine.Scripting.Preserve]
-        public void Initialize()
-        {
-            if (doubleBufferedMesh != null)
-            {
-                doubleBufferedMesh.GetNext().Clear();
-                doubleBufferedMesh.GetNext().Clear();
-                submeshMaterials.Clear();
-            }
-            else
-            {
-                doubleBufferedMesh = new DoubleBuffered<SmartMesh>();
-            }
-        }
+		public void Initialize () {
+			if (doubleBufferedMesh != null) {
+				doubleBufferedMesh.GetNext().Clear();
+				doubleBufferedMesh.GetNext().Clear();
+				submeshMaterials.Clear();
+			} else {
+				doubleBufferedMesh = new DoubleBuffered<SmartMesh>();
+			}
+		}
 
-        /// <summary>Returns a sharedMaterials array for use on a MeshRenderer.</summary>
-        /// <returns></returns>
-        [UnityEngine.Scripting.Preserve]
-        public Material[] GetUpdatedSharedMaterialsArray()
-        {
-            if (submeshMaterials.Count == sharedMaterials.Length)
-                submeshMaterials.CopyTo(sharedMaterials);
-            else
-                sharedMaterials = submeshMaterials.ToArray();
+		/// <summary>Updates an internal materials list with the given instruction list.</summary>
+		public void GatherMaterialsFromInstructions (ExposedList<SubmeshInstruction> instructions,
+			out bool materialsChanged) {
+			int newSize = instructions.Count;
+			{ //submeshMaterials.Resize(instructions.Count);
+				if (newSize > submeshMaterials.Items.Length)
+					Array.Resize(ref submeshMaterials.Items, newSize);
+				submeshMaterials.Count = newSize;
+			}
 
-            return sharedMaterials;
-        }
+			Material[] submeshMaterialsItems = submeshMaterials.Items;
+			SubmeshInstruction[] instructionsItems = instructions.Items;
+			for (int i = 0; i < newSize; i++)
+				submeshMaterialsItems[i] = instructionsItems[i].material;
 
-        /// <summary>Returns true if the materials were modified since the buffers were last updated.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public bool MaterialsChangedInLastUpdate()
-        {
-            int newSubmeshMaterials = submeshMaterials.Count;
-            var sharedMaterials = this.sharedMaterials;
-            if (newSubmeshMaterials != sharedMaterials.Length) return true;
+			materialsChanged = EvaluateMaterialsChanged();
+		}
 
-            var submeshMaterialsItems = submeshMaterials.Items;
-            for (int i = 0; i < newSubmeshMaterials; i++)
-                if (!Material.ReferenceEquals(submeshMaterialsItems[i], sharedMaterials[i]))
-                    return true; //if (submeshMaterialsItems[i].GetInstanceID() != sharedMaterials[i].GetInstanceID()) return true;
+		/// <summary>Returns a sharedMaterials array for use on a MeshRenderer.</summary>
+		/// <returns></returns>
+		public Material[] UpdateSharedMaterialsArray () {
+			if (submeshMaterials.Count == sharedMaterials.Length)
+				submeshMaterials.CopyTo(sharedMaterials);
+			else
+				sharedMaterials = submeshMaterials.ToArray();
+			return sharedMaterials;
+		}
 
-            return false;
-        }
+		public SmartMesh GetCurrentMesh () {
+			return doubleBufferedMesh.GetCurrent();
+		}
 
-        /// <summary>Updates the internal shared materials array with the given instruction list.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public void UpdateSharedMaterials(ExposedList<SubmeshInstruction> instructions)
-        {
-            int newSize = instructions.Count;
-            {
-                //submeshMaterials.Resize(instructions.Count);
-                if (newSize > submeshMaterials.Items.Length)
-                    Array.Resize(ref submeshMaterials.Items, newSize);
-                submeshMaterials.Count = newSize;
-            }
+		public SmartMesh GetNextMesh () {
+			return doubleBufferedMesh.GetNext();
+		}
 
-            var submeshMaterialsItems = submeshMaterials.Items;
-            var instructionsItems = instructions.Items;
-            for (int i = 0; i < newSize; i++)
-                submeshMaterialsItems[i] = instructionsItems[i].material;
-        }
+		public void Clear () {
+			sharedMaterials = new Material[0];
+			submeshMaterials.Clear();
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public SmartMesh GetNextMesh()
-        {
-            return doubleBufferedMesh.GetNext();
-        }
+		public void Dispose () {
+			if (doubleBufferedMesh == null) return;
+			doubleBufferedMesh.GetNext().Dispose();
+			doubleBufferedMesh.GetNext().Dispose();
+			doubleBufferedMesh = null;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public void Clear()
-        {
-            sharedMaterials = new Material[0];
-            submeshMaterials.Clear();
-        }
+		/// <summary>This is a Mesh that also stores the instructions SkeletonRenderer generated for it.</summary>
+		public class SmartMesh : IDisposable {
+			public Mesh mesh = SpineMesh.NewSkeletonMesh();
+			public SkeletonRendererInstruction instructionUsed = new SkeletonRendererInstruction();
 
-        [UnityEngine.Scripting.Preserve]
-        public void Dispose()
-        {
-            if (doubleBufferedMesh == null) return;
-            doubleBufferedMesh.GetNext().Dispose();
-            doubleBufferedMesh.GetNext().Dispose();
-            doubleBufferedMesh = null;
-        }
+			public void Clear () {
+				mesh.Clear();
+				instructionUsed.Clear();
+			}
 
-        ///<summary>This is a Mesh that also stores the instructions SkeletonRenderer generated for it.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public class SmartMesh : IDisposable
-        {
-            [UnityEngine.Scripting.Preserve] public Mesh mesh = SpineMesh.NewSkeletonMesh();
-            [UnityEngine.Scripting.Preserve] public SkeletonRendererInstruction instructionUsed = new SkeletonRendererInstruction();
-
-            [UnityEngine.Scripting.Preserve]
-            public void Clear()
-            {
-                mesh.Clear();
-                instructionUsed.Clear();
-            }
-
-            [UnityEngine.Scripting.Preserve]
-            public void Dispose()
-            {
-                if (mesh != null)
-                {
+			public void Dispose () {
+				if (mesh != null) {
 #if UNITY_EDITOR
-                    if (Application.isEditor && !Application.isPlaying)
-                        UnityEngine.Object.DestroyImmediate(mesh);
-                    else
-                        UnityEngine.Object.Destroy(mesh);
+					if (Application.isEditor && !Application.isPlaying)
+						UnityEngine.Object.DestroyImmediate(mesh);
+					else
+						UnityEngine.Object.Destroy(mesh);
 #else
 					UnityEngine.Object.Destroy(mesh);
 #endif
-                }
+				}
+				mesh = null;
+			}
+		}
 
-                mesh = null;
-            }
-        }
-    }
+		/// <summary>Returns true if the materials were modified since the buffers were last updated.</summary>
+		protected bool EvaluateMaterialsChanged () {
+			int submeshMaterialsHash = 0;
+			int newSubmeshMaterials = submeshMaterials.Count;
+			Material[] submeshMaterialsItems = submeshMaterials.Items;
+			for (int i = 0; i < newSubmeshMaterials; i++) {
+				Material material = submeshMaterialsItems[i];
+				if (material == null) continue;
+				int hash = material.GetHashCode() * (i + 1);
+				submeshMaterialsHash += hash;
+			}
+			bool isNewHash = previousMaterialHash != submeshMaterialsHash;
+			previousMaterialHash = submeshMaterialsHash;
+			return isNewHash || (sharedMaterials.Length != newSubmeshMaterials);
+		}
+	}
 }

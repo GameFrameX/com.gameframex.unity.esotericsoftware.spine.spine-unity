@@ -60,14 +60,22 @@ namespace Spine.Unity
 
             if (component == null)
             {
-                // 不存在则自动添加新组件
-                return SkeletonRenderer.AddSpineComponent<SkeletonAnimation>(gameObject, skeletonDataAsset, quiet);
+                // spine-unity 4.3 splits rendering and animation across two components.
+                var components = SkeletonAnimation.AddToGameObject(gameObject, skeletonDataAsset, quiet);
+                OnChangeSpine(components.skeletonAnimation, animationName, isLoop);
+                return components.skeletonAnimation;
             }
 
-            component.ClearState();
+            var renderer = gameObject.GetComponent<SkeletonRenderer>();
+            if (renderer == null)
+            {
+                renderer = gameObject.AddComponent<SkeletonRenderer>();
+            }
+
             // 已存在则直接替换骨骼数据并刷新
-            component.skeletonDataAsset = skeletonDataAsset;
-            component.Initialize(true, true);
+            renderer.SkeletonDataAsset = skeletonDataAsset;
+            renderer.Initialize(true, quiet);
+            component.Initialize(true, quiet);
             skeletonDataAsset.GetSkeletonData(true); // 强制同步数据
             OnChangeSpine(component, animationName, isLoop);
             return component;
@@ -88,7 +96,7 @@ namespace Spine.Unity
             var animationToUse = !string.IsNullOrEmpty(animationName) ? skeletonData.FindAnimation(animationName) : null;
             if (animationToUse != null)
             {
-                var trackEntry = state.GetCurrent(0);
+                var trackEntry = state.GetTrack(0);
                 // 若当前无动画、动画名不同或已播放完毕且非循环，则重新设置
                 if (trackEntry == null || trackEntry.Animation.Name != animationName || trackEntry.IsComplete && !trackEntry.Loop)
                 {

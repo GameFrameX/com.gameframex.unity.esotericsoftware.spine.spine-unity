@@ -25,6 +25,8 @@ All-in-One Solution for Indie Game Development · Empowering Indie Developers' D
 
 A secondary distribution of the **Spine-Unity** runtime, repackaged from the official Spine Runtime. This library primarily serves as a sub-module for [GameFrameX](https://github.com/AlianBlank/GameFrameX).
 
+Supports Spine Editor 4.3 data exported from 4.3.74-beta or 4.3.00 (release) and newer.
+
 ### Modifications from Official Version
 
 1. Added `link.xml` for strip filtering
@@ -49,7 +51,7 @@ Choose one of the following methods:
        }
      ],
      "dependencies": {
-       "com.gameframex.unity.esotericsoftware.spine.spine-unity": "3.9.0"
+       "com.gameframex.unity.esotericsoftware.spine.spine-unity": "4.3.95"
      }
    }
    ```
@@ -82,7 +84,7 @@ See [Releases](https://github.com/gameframex/com.gameframex.unity.esotericsoftwa
 
 | Package | Description |
 |---------|-------------|
-| (无) | - |
+| `com.unity.ugui` / Unity modules | Required by spine-unity UI, animation, physics, and sprite integrations. |
 
 ## License
 

@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,22 +27,30 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
+#if UNITY_6000_3_OR_NEWER
+#define USES_ENTITY_ID
+#endif
+
+#if UNITY_2022_2_OR_NEWER
+#define TEXTUREIMPORTER_SPRITESHEET_OBSOLETE
+#endif
+
 //#define BAKE_ALL_BUTTON
 //#define REGION_BAKING_MESH
 
+using Spine;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using Spine;
 
 namespace Spine.Unity.Editor {
 	using Event = UnityEngine.Event;
 
 	[CustomEditor(typeof(SpineAtlasAsset)), CanEditMultipleObjects]
 	public class SpineAtlasAssetInspector : UnityEditor.Editor {
-		SerializedProperty atlasFile, materials;
+		SerializedProperty atlasFile, materials, materialOverrides, textureLoadingMode, onDemandTextureLoader;
 		SpineAtlasAsset atlasAsset;
 
 		GUIContent spriteSlicesLabel;
@@ -70,14 +78,17 @@ namespace Spine.Unity.Editor {
 			SpineEditorUtilities.ConfirmInitialization();
 			atlasFile = serializedObject.FindProperty("atlasFile");
 			materials = serializedObject.FindProperty("materials");
+			textureLoadingMode = serializedObject.FindProperty("textureLoadingMode");
+			onDemandTextureLoader = serializedObject.FindProperty("onDemandTextureLoader");
 			materials.isExpanded = true;
+			materialOverrides = serializedObject.FindProperty("serializedMaterialOverrides");
 			atlasAsset = (SpineAtlasAsset)target;
-			#if REGION_BAKING_MESH
+#if REGION_BAKING_MESH
 			UpdateBakedList();
-			#endif
+#endif
 		}
 
-		#if REGION_BAKING_MESH
+#if REGION_BAKING_MESH
 		private List<bool> baked;
 		private List<GameObject> bakedObjects;
 
@@ -99,7 +110,7 @@ namespace Spine.Unity.Editor {
 				}
 			}
 		}
-		#endif
+#endif
 
 		override public void OnInspectorGUI () {
 			if (serializedObject.isEditingMultipleObjects) {
@@ -125,19 +136,31 @@ namespace Spine.Unity.Editor {
 
 			for (int i = 0; i < materials.arraySize; i++) {
 				SerializedProperty prop = materials.GetArrayElementAtIndex(i);
-				var material = (Material)prop.objectReferenceValue;
+				Material material = (Material)prop.objectReferenceValue;
 				if (material == null) {
 					EditorGUILayout.HelpBox("Materials cannot be null.", MessageType.Error);
 					return;
 				}
 			}
 
+			EditorGUILayout.PropertyField(materialOverrides, true);
+
+			if (textureLoadingMode != null) {
+				EditorGUILayout.Space();
+				EditorGUILayout.PropertyField(textureLoadingMode);
+				EditorGUILayout.PropertyField(onDemandTextureLoader);
+			}
+
 			EditorGUILayout.Space();
 			if (SpineInspectorUtility.LargeCenteredButton(SpineInspectorUtility.TempContent("Set Mipmap Bias to " + SpinePreferences.DEFAULT_MIPMAPBIAS, tooltip: "This may help textures with mipmaps be less blurry when used for 2D sprites."))) {
-				foreach (var m in atlasAsset.materials) {
-					var texture = m.mainTexture;
+				foreach (Material m in atlasAsset.materials) {
+					Texture texture = m.mainTexture;
+#if USES_ENTITY_ID
+					string texturePath = AssetDatabase.GetAssetPath(texture.GetEntityId());
+#else
 					string texturePath = AssetDatabase.GetAssetPath(texture.GetInstanceID());
-					var importer = (TextureImporter)TextureImporter.GetAtPath(texturePath);
+#endif
+					TextureImporter importer = (TextureImporter)TextureImporter.GetAtPath(texturePath);
 					importer.mipMapBias = SpinePreferences.DEFAULT_MIPMAPBIAS;
 					EditorUtility.SetDirty(texture);
 				}
@@ -147,15 +170,15 @@ namespace Spine.Unity.Editor {
 			EditorGUILayout.Space();
 			if (atlasFile.objectReferenceValue != null) {
 				if (SpineInspectorUtility.LargeCenteredButton(SpriteSlicesLabel)) {
-					var atlas = atlasAsset.GetAtlas();
-					foreach (var m in atlasAsset.materials)
+					Atlas atlas = atlasAsset.GetAtlas();
+					foreach (Material m in atlasAsset.materials)
 						UpdateSpriteSlices(m.mainTexture, atlas);
 				}
 			}
 
 			EditorGUILayout.Space();
 
-			#if REGION_BAKING_MESH
+#if REGION_BAKING_MESH
 			if (atlasFile.objectReferenceValue != null) {
 				Atlas atlas = asset.GetAtlas();
 				FieldInfo field = typeof(Atlas).GetField("regions", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.NonPublic);
@@ -219,7 +242,7 @@ namespace Spine.Unity.Editor {
 				}
 				EditorGUI.indentLevel--;
 
-				#if BAKE_ALL_BUTTON
+#if BAKE_ALL_BUTTON
 				// Check state
 				bool allBaked = true;
 				bool allUnbaked = true;
@@ -258,16 +281,16 @@ namespace Spine.Unity.Editor {
 					}
 
 				}
-				#endif
+#endif
 
 			}
-			#else
+#else
 			if (atlasFile.objectReferenceValue != null) {
 
 
 				int baseIndent = EditorGUI.indentLevel;
 
-				var regions = SpineAtlasAssetInspector.GetRegions(atlasAsset.GetAtlas());
+				List<AtlasRegion> regions = SpineAtlasAssetInspector.GetRegions(atlasAsset.GetAtlas());
 				int regionsCount = regions.Count;
 				using (new EditorGUILayout.HorizontalScope()) {
 					EditorGUILayout.LabelField("Atlas Regions", EditorStyles.boldLabel);
@@ -306,36 +329,113 @@ namespace Spine.Unity.Editor {
 				}
 				EditorGUI.indentLevel = baseIndent;
 			}
-			#endif
+#endif
 
 			if (serializedObject.ApplyModifiedProperties() || SpineInspectorUtility.UndoRedoPerformed(Event.current))
 				atlasAsset.Clear();
 		}
 
 		static public void UpdateSpriteSlices (Texture texture, Atlas atlas) {
+#if USES_ENTITY_ID
+			string texturePath = AssetDatabase.GetAssetPath(texture.GetEntityId());
+#else
 			string texturePath = AssetDatabase.GetAssetPath(texture.GetInstanceID());
-			var t = (TextureImporter)TextureImporter.GetAtPath(texturePath);
+#endif
+			TextureImporter t = (TextureImporter)TextureImporter.GetAtPath(texturePath);
 			t.spriteImportMode = SpriteImportMode.Multiple;
-			var spriteSheet = t.spritesheet;
-			var sprites = new List<SpriteMetaData>(spriteSheet);
 
-			var regions = SpineAtlasAssetInspector.GetRegions(atlas);
-			char[] FilenameDelimiter = {'.'};
+			List<AtlasRegion> regions = SpineAtlasAssetInspector.GetRegions(atlas);
 			int updatedCount = 0;
 			int addedCount = 0;
 
-			foreach (var r in regions) {
-				string pageName = r.page.name.Split(FilenameDelimiter, StringSplitOptions.RemoveEmptyEntries)[0];
+#if TEXTUREIMPORTER_SPRITESHEET_OBSOLETE
+			// Avoid assembly reference to Unity.2D.Sprite.Editor which causes an error on Unity 2018.3.
+			Type factoryType = null;
+			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+				factoryType = assembly.GetType("UnityEditor.U2D.Sprites.SpriteDataProviderFactories");
+				if (factoryType != null) break;
+			}
+			if (factoryType == null) {
+				Debug.LogWarning("SpriteDataProviderFactories type not found. Sprite slices could not be applied.");
+				return;
+			}
+			// The following reflection code is equivalent to this:
+			// SpriteDataProviderFactories factory = new SpriteDataProviderFactories();
+			// factory.Init();
+			// ISpriteEditorDataProvider dataProvider = factory.GetSpriteEditorDataProviderFromObject(t);
+			// dataProvider.InitSpriteEditorDataProvider();
+			// 
+			// SpriteRect[] spriteRects = dataProvider.GetSpriteRects();
+			// List<SpriteRect> sprites = new List<SpriteRect>(spriteRects);
+			object factory = Activator.CreateInstance(factoryType);
+			factoryType.GetMethod("Init").Invoke(factory, null);
+			object dataProvider = factoryType.GetMethod("GetSpriteEditorDataProviderFromObject").Invoke(factory, new object[] { t });
+			Type providerInterface = dataProvider.GetType().GetInterface("ISpriteEditorDataProvider");
+			providerInterface.GetMethod("InitSpriteEditorDataProvider").Invoke(dataProvider, null);
+			Array spriteRectsArray = (Array)providerInterface.GetMethod("GetSpriteRects").Invoke(dataProvider, null);
+			Type spriteRectType = spriteRectsArray.GetType().GetElementType();
+			// Find a base type with a default constructor for creating new instances,
+			// since the array element type may be a derived type without one.
+			Type spriteRectBaseType = spriteRectType;
+			while (spriteRectBaseType != null && spriteRectBaseType != typeof(object)
+				&& spriteRectBaseType.GetConstructor(Type.EmptyTypes) == null)
+				spriteRectBaseType = spriteRectBaseType.BaseType;
+			PropertyInfo nameProperty = spriteRectBaseType.GetProperty("name");
+			PropertyInfo rectProperty = spriteRectBaseType.GetProperty("rect");
+			PropertyInfo pivotProperty = spriteRectBaseType.GetProperty("pivot");
+
+			List<object> sprites = new List<object>();
+			for (int i = 0; i < spriteRectsArray.Length; i++)
+				sprites.Add(spriteRectsArray.GetValue(i));
+
+			foreach (AtlasRegion r in regions) {
+				string pageName = System.IO.Path.GetFileNameWithoutExtension(r.page.name);
 				string textureName = texture.name;
 				bool pageMatch = string.Equals(pageName, textureName, StringComparison.Ordinal);
 
-//				if (pageMatch) {
-//					int pw = r.page.width;
-//					int ph = r.page.height;
-//					bool mismatchSize = pw != texture.width || pw > t.maxTextureSize || ph != texture.height || ph > t.maxTextureSize;
-//					if (mismatchSize)
-//						Debug.LogWarningFormat("Size mismatch found.\nExpected atlas size is {0}x{1}. Texture Import Max Size of texture '{2}'({4}x{5}) is currently set to {3}.", pw, ph, texture.name, t.maxTextureSize, texture.width, texture.height);
-//				}
+				int spriteIndex = pageMatch ? sprites.FindIndex(
+					(s) => string.Equals((string)nameProperty.GetValue(s), r.name, StringComparison.Ordinal)
+				) : -1;
+				bool spriteNameMatchExists = spriteIndex >= 0;
+
+				if (pageMatch) {
+					Rect spriteRect = new Rect();
+					spriteRect.width = r.width;
+					spriteRect.height = r.height;
+					spriteRect.x = r.x;
+					spriteRect.y = r.page.height - spriteRect.height - r.y;
+
+					if (spriteNameMatchExists) {
+						object s = sprites[spriteIndex];
+						rectProperty.SetValue(s, spriteRect);
+						updatedCount++;
+					} else {
+						object newSpriteRect = Activator.CreateInstance(spriteRectBaseType);
+						nameProperty.SetValue(newSpriteRect, r.name);
+						rectProperty.SetValue(newSpriteRect, spriteRect);
+						pivotProperty.SetValue(newSpriteRect, new Vector2(0.5f, 0.5f));
+						sprites.Add(newSpriteRect);
+						addedCount++;
+					}
+				}
+			}
+
+			Array resultArray = Array.CreateInstance(spriteRectBaseType, sprites.Count);
+			for (int i = 0; i < sprites.Count; i++)
+				resultArray.SetValue(sprites[i], i);
+			// The following reflection code is equivalent to this:
+			// dataProvider.SetSpriteRects(spriteRects);
+			// dataProvider.Apply();
+			providerInterface.GetMethod("SetSpriteRects").Invoke(dataProvider, new object[] { resultArray });
+			providerInterface.GetMethod("Apply").Invoke(dataProvider, null);
+#else
+			SpriteMetaData[] spriteSheet = t.spritesheet;
+			List<SpriteMetaData> sprites = new List<SpriteMetaData>(spriteSheet);
+
+			foreach (AtlasRegion r in regions) {
+				string pageName = System.IO.Path.GetFileNameWithoutExtension(r.page.name);
+				string textureName = texture.name;
+				bool pageMatch = string.Equals(pageName, textureName, StringComparison.Ordinal);
 
 				int spriteIndex = pageMatch ? sprites.FindIndex(
 					(s) => string.Equals(s.name, r.name, StringComparison.Ordinal)
@@ -344,19 +444,13 @@ namespace Spine.Unity.Editor {
 
 				if (pageMatch) {
 					Rect spriteRect = new Rect();
-
-					if (r.rotate) {
-						spriteRect.width = r.height;
-						spriteRect.height = r.width;
-					} else {
-						spriteRect.width = r.width;
-						spriteRect.height = r.height;
-					}
+					spriteRect.width = r.width;
+					spriteRect.height = r.height;
 					spriteRect.x = r.x;
 					spriteRect.y = r.page.height - spriteRect.height - r.y;
 
 					if (spriteNameMatchExists) {
-						var s = sprites[spriteIndex];
+						SpriteMetaData s = sprites[spriteIndex];
 						s.rect = spriteRect;
 						sprites[spriteIndex] = s;
 						updatedCount++;
@@ -369,10 +463,10 @@ namespace Spine.Unity.Editor {
 						addedCount++;
 					}
 				}
-
 			}
 
 			t.spritesheet = sprites.ToArray();
+#endif
 			EditorUtility.SetDirty(t);
 			AssetDatabase.ImportAsset(texturePath, ImportAssetOptions.ForceUpdate);
 			EditorGUIUtility.PingObject(texture);

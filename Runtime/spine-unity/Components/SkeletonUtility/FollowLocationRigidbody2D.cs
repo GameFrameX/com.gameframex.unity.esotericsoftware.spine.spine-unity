@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -29,36 +29,30 @@
 
 using UnityEngine;
 
-namespace Spine.Unity
-{
-    /// <summary>
-    /// Utility component to support flipping of hinge chains (chains of HingeJoint objects) along with the parent skeleton.
-    /// 
-    /// Note: This component is automatically attached when calling "Create Hinge Chain" at <see cref="SkeletonUtilityBone"/>.
-    /// </summary>
-    [RequireComponent(typeof(Rigidbody2D))]
-    [UnityEngine.Scripting.Preserve]
-    public class FollowLocationRigidbody2D : MonoBehaviour
-    {
-        [UnityEngine.Scripting.Preserve] public Transform reference;
-        [UnityEngine.Scripting.Preserve] public bool followFlippedX;
-        Rigidbody2D ownRigidbody;
+namespace Spine.Unity {
 
-        private void Awake()
-        {
-            ownRigidbody = this.GetComponent<Rigidbody2D>();
-        }
+	/// <summary>
+	/// Utility component to support flipping of hinge chains (chains of HingeJoint objects) along with the parent skeleton.
+	/// 
+	/// Note: This component is automatically attached when calling "Create Hinge Chain" at <see cref="SkeletonUtilityBone"/>.
+	/// </summary>
+	[RequireComponent(typeof(Rigidbody2D))]
+	public class FollowLocationRigidbody2D : MonoBehaviour {
 
-        void FixedUpdate()
-        {
-            if (followFlippedX)
-            {
-                ownRigidbody.rotation = ((-reference.rotation.eulerAngles.z + 270f) % 360f) - 90f;
-            }
-            else
-                ownRigidbody.rotation = reference.rotation.eulerAngles.z;
+		public Transform reference;
+		public bool followFlippedX;
+		Rigidbody2D ownRigidbody;
 
-            ownRigidbody.position = reference.position;
-        }
-    }
+		private void Awake () {
+			ownRigidbody = this.GetComponent<Rigidbody2D>();
+		}
+
+		void FixedUpdate () {
+			if (followFlippedX) {
+				ownRigidbody.rotation = ((-reference.rotation.eulerAngles.z + 270f) % 360f) - 90f;
+			} else
+				ownRigidbody.rotation = reference.rotation.eulerAngles.z;
+			ownRigidbody.position = reference.position;
+		}
+	}
 }
