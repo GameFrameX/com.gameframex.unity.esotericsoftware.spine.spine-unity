@@ -2,7 +2,7 @@
   "name": "com.gameframex.unity.esotericsoftware.spine.spine-unity",
   "displayName": "Spine-Unity",
   "description": "This plugin provides the spine-unity runtime core for Spine 4.3.",
-  "version": "4.3.95",
+  "version": "4.3.96",
   "unity": "2019.4",
   "author": {
     "name": "Blank",

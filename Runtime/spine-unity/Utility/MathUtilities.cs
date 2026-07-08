@@ -30,7 +30,9 @@
 using UnityEngine;
 
 namespace Spine.Unity {
+	[UnityEngine.Scripting.Preserve]
 	public static class MathUtilities {
+		[UnityEngine.Scripting.Preserve]
 		public static float InverseLerp (float a, float b, float value) {
 			return (value - a) / (b - a);
 		}
@@ -39,6 +41,7 @@ namespace Spine.Unity {
 		/// Returns the linear interpolation ratio of <c>a</c> to <c>b</c> that <c>value</c> lies on.
 		/// This is the t value that fulfills <c>value = lerp(a, b, t)</c>.
 		/// </summary>
+		[UnityEngine.Scripting.Preserve]
 		public static Vector2 InverseLerp (Vector2 a, Vector2 b, Vector2 value) {
 			return new Vector2(
 				(value.x - a.x) / (b.x - a.x),
@@ -49,6 +52,7 @@ namespace Spine.Unity {
 		/// Returns the linear interpolation ratio of <c>a</c> to <c>b</c> that <c>value</c> lies on.
 		/// This is the t value that fulfills <c>value = lerp(a, b, t)</c>.
 		/// </summary>
+		[UnityEngine.Scripting.Preserve]
 		public static Vector3 InverseLerp (Vector3 a, Vector3 b, Vector3 value) {
 			return new Vector3(
 				(value.x - a.x) / (b.x - a.x),
@@ -60,6 +64,7 @@ namespace Spine.Unity {
 		/// Returns the linear interpolation ratio of <c>a</c> to <c>b</c> that <c>value</c> lies on.
 		/// This is the t value that fulfills <c>value = lerp(a, b, t)</c>.
 		/// </summary>
+		[UnityEngine.Scripting.Preserve]
 		public static Vector4 InverseLerp (Vector4 a, Vector4 b, Vector4 value) {
 			return new Vector4(
 				(value.x - a.x) / (b.x - a.x),

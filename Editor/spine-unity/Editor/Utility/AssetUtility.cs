@@ -261,12 +261,12 @@ namespace Spine.Unity.Editor {
 			binary = null;
 		}
 
-		internal static AtlasAssetBase GetMatchingAtlas (List<string> requiredPaths, string skeletonName,
+		internal static List<AtlasAssetBase> GetMatchingAtlases (List<string> requiredPaths, string skeletonName,
 			List<AtlasAssetBase> atlasAssets) {
 			atlasAssets.Sort((a, b) => (
 					string.CompareOrdinal(b.name, skeletonName)
 					- string.CompareOrdinal(a.name, skeletonName)));
-			return GetMatchingAtlas(requiredPaths, atlasAssets);
+			return GetMatchingAtlases(requiredPaths, atlasAssets);
 		}
 
 		internal static AtlasRegion FindRegionIgnoringNumberSuffix (this Atlas atlas, string regionPath) {
@@ -289,8 +289,8 @@ namespace Spine.Unity.Editor {
 			return null;
 		}
 
-		internal static AtlasAssetBase GetMatchingAtlas (List<string> requiredPaths, List<AtlasAssetBase> atlasAssets) {
-			AtlasAssetBase atlasAssetMatch = null;
+		internal static List<AtlasAssetBase> GetMatchingAtlases (List<string> requiredPaths, List<AtlasAssetBase> atlasAssets) {
+			List<AtlasAssetBase> matchingAtlases = new List<AtlasAssetBase>();
 
 			foreach (AtlasAssetBase a in atlasAssets) {
 				Atlas atlas = a.GetAtlas();
@@ -301,14 +301,11 @@ namespace Spine.Unity.Editor {
 						break;
 					}
 				}
-
 				if (!failed) {
-					atlasAssetMatch = a;
-					break;
+					matchingAtlases.Add(a);
 				}
 			}
-
-			return atlasAssetMatch;
+			return matchingAtlases;
 		}
 
 		public class AtlasRequirementLoader : AttachmentLoader {
@@ -461,16 +458,17 @@ namespace Spine.Unity.Editor {
 				List<AtlasAssetBase> atlasesInSameDir = atlasesForSkeleton.Where(
 					atlas => AssetDatabase.GetAssetPath(atlas).Contains(dir)).ToList();
 
-				AtlasAssetBase atlasMatch = GetMatchingAtlas(requiredPaths, skeletonName, atlasesInSameDir);
-				if (atlasMatch == null && atlasesInSameDir.Count > 0) {
+				List<AtlasAssetBase> matchingAtlases = GetMatchingAtlases(requiredPaths, skeletonName, atlasesInSameDir);
+				if (matchingAtlases.Count == 0 && atlasesInSameDir.Count > 0) {
 					AtlasAssetBase firstAtlas = atlasesInSameDir[0];
 					Debug.LogWarning(string.Format(
 						"'{0}' atlas found in skeleton directory does not contain all required attachments",
 						firstAtlas.name), firstAtlas);
 
 					List<AtlasAssetBase> atlasesInOtherDir = atlasesForSkeleton.Except(atlasesInSameDir).ToList();
-					atlasMatch = GetMatchingAtlas(requiredPaths, skeletonName, atlasesInOtherDir);
-					if (atlasMatch != null) {
+					matchingAtlases = GetMatchingAtlases(requiredPaths, skeletonName, atlasesInOtherDir);
+					if (matchingAtlases.Count > 0) {
+						AtlasAssetBase atlasMatch = matchingAtlases[0];
 						Debug.Log(string.Format(
 							"Using suitable atlas '{0}' of other imported directory. If this is the " +
 							"wrong atlas asset, please assign the correct one at the SkeletonData asset.",
@@ -478,8 +476,11 @@ namespace Spine.Unity.Editor {
 					}
 				}
 
-				if (atlasMatch != null || requiredPaths.Count == 0) {
-					IngestSpineProject(loadedAsset, atlasMatch);
+				if (matchingAtlases.Count > 0) {
+					for (int i = matchingAtlases.Count - 1; i >= 0; --i)
+						IngestSpineProject(loadedAsset, matchingAtlases[i]);
+				} else if (requiredPaths.Count == 0) {
+					IngestSpineProject(loadedAsset, new AtlasAssetBase[] { });
 				} else {
 					SkeletonImportDialog(skeletonPath, atlasesForSkeleton, requiredPaths, ref abortSkeletonImport);
 				}
@@ -1238,10 +1239,13 @@ namespace Spine.Unity.Editor {
 					if (selectedAtlas != null) {
 						localAtlases.Clear();
 						localAtlases.Add(selectedAtlas);
-						AtlasAssetBase atlasMatch = AssetUtility.GetMatchingAtlas(requiredPaths, localAtlases);
-						if (atlasMatch != null) {
+						List<AtlasAssetBase> matchingAtlases = AssetUtility.GetMatchingAtlases(requiredPaths, localAtlases);
+						if (matchingAtlases.Count > 0) {
 							resolved = true;
-							AssetUtility.IngestSpineProject(AssetDatabase.LoadAssetAtPath<TextAsset>(skeletonPath), atlasMatch);
+							for (int i = matchingAtlases.Count - 1; i >= 0; --i) {
+								AssetUtility.IngestSpineProject(AssetDatabase.LoadAssetAtPath<TextAsset>(skeletonPath),
+									matchingAtlases[i]);
+							}
 						}
 					}
 					break;

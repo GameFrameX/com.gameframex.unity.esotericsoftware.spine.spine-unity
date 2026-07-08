@@ -35,7 +35,7 @@
             _ = typeof(Spine.BoneMatrix);
             _ = typeof(Spine.BoundingBoxAttachment);
             _ = typeof(Spine.ClippingAttachment);
-            _ = typeof(Spine.ConstraintData);
+            _ = typeof(Spine.ConstraintData<,>);
             _ = typeof(Spine.CurveTimeline);
             _ = typeof(Spine.DeformTimeline);
             _ = typeof(Spine.DrawOrderTimeline);

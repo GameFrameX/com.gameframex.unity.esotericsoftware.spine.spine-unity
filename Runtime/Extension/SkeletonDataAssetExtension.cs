@@ -73,6 +73,7 @@ namespace Spine.Unity
             }
 
             // 已存在则直接替换骨骼数据并刷新
+            renderer.Animation = component;
             renderer.SkeletonDataAsset = skeletonDataAsset;
             renderer.Initialize(true, quiet);
             component.Initialize(true, quiet);
@@ -126,10 +127,18 @@ namespace Spine.Unity
             if (skeletonAnimation.skeleton.Skin != skin)
             {
                 skeletonAnimation.skeleton.SetSkin(skin);
-                skeletonAnimation.skeleton.SetSlotsToSetupPose(); // 强制刷新到初始姿态
+                skeletonAnimation.skeleton.SetupPoseSlots(); // 强制刷新到初始姿态
             }
 
-            skeletonAnimation.LateUpdate();
+            var renderer = skeletonAnimation.GetComponent<SkeletonRenderer>();
+            if (renderer != null)
+            {
+                renderer.LateUpdate();
+            }
+            else
+            {
+                skeletonAnimation.UpdateOncePerFrame(0);
+            }
         }
     }
 }
