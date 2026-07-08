@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SkeletonGraphicTintBlack
-  m_Shader: {fileID: 4800000, guid: f64c7bc238bb2c246b8ca1912b2b6b9c, type: 3}
+  m_Shader: {fileID: 4800000, guid: a7fb78f791a244caea5bbafde7bd1e24, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
