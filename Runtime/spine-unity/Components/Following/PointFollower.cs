@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -31,169 +31,167 @@
 #define NEW_PREFAB_SYSTEM
 #endif
 
-using UnityEngine;
+#if !SPINE_AUTO_UPGRADE_COMPONENTS_OFF
+#define AUTO_UPGRADE_TO_43_COMPONENTS
+#endif
 
-namespace Spine.Unity
-{
+using UnityEngine;
+using UnityEngine.Serialization;
+
+namespace Spine.Unity {
+
 #if NEW_PREFAB_SYSTEM
-    [ExecuteAlways]
+	[ExecuteAlways]
 #else
 	[ExecuteInEditMode]
 #endif
-    [AddComponentMenu("Spine/Point Follower")]
-    [HelpURL("http://esotericsoftware.com/spine-unity#PointFollower")]
-    [UnityEngine.Scripting.Preserve]
-    public class PointFollower : MonoBehaviour, IHasSkeletonRenderer, IHasSkeletonComponent
-    {
-        [UnityEngine.Scripting.Preserve] public SkeletonRenderer skeletonRenderer;
+	[AddComponentMenu("Spine/Point Follower")]
+	[HelpURL("https://esotericsoftware.com/spine-unity-utility-components#PointFollower")]
+	public class PointFollower : MonoBehaviour, IHasSkeletonRenderer, IHasSkeletonComponent, IUpgradable {
 
-        [UnityEngine.Scripting.Preserve]
-        public SkeletonRenderer SkeletonRenderer
-        {
-            get { return this.skeletonRenderer; }
-        }
+		public SkeletonRenderer skeletonRenderer;
+		public ISkeletonRenderer SkeletonRenderer { get { return this.skeletonRenderer; } }
+		public ISkeletonRenderer Renderer { get { return this.skeletonRenderer; } }
+		public ISkeletonComponent SkeletonComponent { get { return skeletonRenderer as ISkeletonComponent; } }
 
-        [UnityEngine.Scripting.Preserve]
-        public ISkeletonComponent SkeletonComponent
-        {
-            get { return skeletonRenderer as ISkeletonComponent; }
-        }
+		[SpineSlot(dataField: "skeletonRenderer", includeNone: true)]
+		public string slotName;
 
-        [SpineSlot(dataField: "skeletonRenderer", includeNone: true)] [UnityEngine.Scripting.Preserve]
-        public string slotName;
+		[SpineAttachment(slotField: "slotName", dataField: "skeletonRenderer", fallbackToTextField: true, includeNone: true)]
+		public string pointAttachmentName;
 
-        [SpineAttachment(slotField: "slotName", dataField: "skeletonRenderer", fallbackToTextField: true, includeNone: true)] [UnityEngine.Scripting.Preserve]
-        public string pointAttachmentName;
+		public bool followRotation = true;
+		public bool followSkeletonFlip = true;
+		public bool followSkeletonZPosition = false;
 
-        [UnityEngine.Scripting.Preserve] public bool followRotation = true;
-        [UnityEngine.Scripting.Preserve] public bool followSkeletonFlip = true;
-        [UnityEngine.Scripting.Preserve] public bool followSkeletonZPosition = false;
+		Transform skeletonTransform;
+		bool skeletonTransformIsParent;
+		PointAttachment point;
+		Bone bone;
+		bool valid;
+		public bool IsValid { get { return valid; } }
 
-        Transform skeletonTransform;
-        bool skeletonTransformIsParent;
-        PointAttachment point;
-        Bone bone;
-        bool valid;
-
-        [UnityEngine.Scripting.Preserve]
-        public bool IsValid
-        {
-            get { return valid; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public void Initialize()
-        {
-            valid = skeletonRenderer != null && skeletonRenderer.valid;
-            if (!valid)
-                return;
-
-            UpdateReferences();
-
-#if UNITY_EDITOR
-            if (Application.isEditor) LateUpdate();
-#endif
-        }
-
-        private void HandleRebuildRenderer(SkeletonRenderer skeletonRenderer)
-        {
-            Initialize();
-        }
-
-        void UpdateReferences()
-        {
-            skeletonTransform = skeletonRenderer.transform;
-            skeletonRenderer.OnRebuild -= HandleRebuildRenderer;
-            skeletonRenderer.OnRebuild += HandleRebuildRenderer;
-            skeletonTransformIsParent = Transform.ReferenceEquals(skeletonTransform, transform.parent);
-
-            bone = null;
-            point = null;
-            if (!string.IsNullOrEmpty(pointAttachmentName))
-            {
-                var skeleton = skeletonRenderer.Skeleton;
-
-                int slotIndex = skeleton.FindSlotIndex(slotName);
-                if (slotIndex >= 0)
-                {
-                    var slot = skeleton.slots.Items[slotIndex];
-                    bone = slot.bone;
-                    point = skeleton.GetAttachment(slotIndex, pointAttachmentName) as PointAttachment;
-                }
-            }
-        }
-
-        void OnDestroy()
-        {
-            if (skeletonRenderer != null)
-                skeletonRenderer.OnRebuild -= HandleRebuildRenderer;
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public void LateUpdate()
-        {
-#if UNITY_EDITOR
-            if (!Application.isPlaying) skeletonTransformIsParent = Transform.ReferenceEquals(skeletonTransform, transform.parent);
+#if UNITY_EDITOR && AUTO_UPGRADE_TO_43_COMPONENTS
+		protected void Awake () {
+			if (!Application.isPlaying && !wasUpgradedTo43) {
+				UpgradeTo43();
+			}
+		}
 #endif
 
-            if (point == null)
-            {
-                if (string.IsNullOrEmpty(pointAttachmentName)) return;
-                UpdateReferences();
-                if (point == null) return;
-            }
+		public void Initialize () {
+			valid = skeletonRenderer != null && skeletonRenderer.valid;
+			if (!valid)
+				return;
 
-            Vector2 worldPos;
-            point.ComputeWorldPosition(bone, out worldPos.x, out worldPos.y);
-            float rotation = point.ComputeWorldRotation(bone);
+			UpdateReferences();
 
-            Transform thisTransform = this.transform;
-            if (skeletonTransformIsParent)
-            {
-                // Recommended setup: Use local transform properties if Spine GameObject is the immediate parent
-                thisTransform.localPosition = new Vector3(worldPos.x, worldPos.y, followSkeletonZPosition ? 0f : thisTransform.localPosition.z);
-                if (followRotation)
-                {
-                    float halfRotation = rotation * 0.5f * Mathf.Deg2Rad;
+#if UNITY_EDITOR
+			if (Application.isEditor) LateUpdate();
+#endif
+		}
 
-                    var q = default(Quaternion);
-                    q.z = Mathf.Sin(halfRotation);
-                    q.w = Mathf.Cos(halfRotation);
-                    thisTransform.localRotation = q;
-                }
-            }
-            else
-            {
-                // For special cases: Use transform world properties if transform relationship is complicated
-                Vector3 targetWorldPosition = skeletonTransform.TransformPoint(new Vector3(worldPos.x, worldPos.y, 0f));
-                if (!followSkeletonZPosition)
-                    targetWorldPosition.z = thisTransform.position.z;
+		private void HandleRebuildRenderer (ISkeletonRenderer skeletonRenderer) {
+			Initialize();
+		}
 
-                Transform transformParent = thisTransform.parent;
-                if (transformParent != null)
-                {
-                    Matrix4x4 m = transformParent.localToWorldMatrix;
-                    if (m.m00 * m.m11 - m.m01 * m.m10 < 0) // Determinant2D is negative
-                        rotation = -rotation;
-                }
+		void UpdateReferences () {
+			skeletonTransform = skeletonRenderer.transform;
+			skeletonRenderer.OnRebuild -= HandleRebuildRenderer;
+			skeletonRenderer.OnRebuild += HandleRebuildRenderer;
+			skeletonTransformIsParent = Transform.ReferenceEquals(skeletonTransform, transform.parent);
 
-                if (followRotation)
-                {
-                    Vector3 transformWorldRotation = skeletonTransform.rotation.eulerAngles;
-                    thisTransform.SetPositionAndRotation(targetWorldPosition, Quaternion.Euler(transformWorldRotation.x, transformWorldRotation.y, transformWorldRotation.z + rotation));
-                }
-                else
-                {
-                    thisTransform.position = targetWorldPosition;
-                }
-            }
+			bone = null;
+			point = null;
+			if (!string.IsNullOrEmpty(pointAttachmentName)) {
+				Skeleton skeleton = skeletonRenderer.Skeleton;
 
-            if (followSkeletonFlip)
-            {
-                Vector3 localScale = thisTransform.localScale;
-                localScale.y = Mathf.Abs(localScale.y) * Mathf.Sign(bone.skeleton.ScaleX * bone.skeleton.ScaleY);
-                thisTransform.localScale = localScale;
-            }
-        }
-    }
+				Slot slot = skeleton.FindSlot(slotName);
+				if (slot != null) {
+					int slotIndex = slot.Data.Index;
+					bone = slot.Bone;
+					point = skeleton.GetAttachment(slotIndex, pointAttachmentName) as PointAttachment;
+				}
+			}
+		}
+
+		void OnDestroy () {
+			if (skeletonRenderer != null)
+				skeletonRenderer.OnRebuild -= HandleRebuildRenderer;
+		}
+
+		public void LateUpdate () {
+#if UNITY_EDITOR
+			if (!Application.isPlaying) skeletonTransformIsParent = Transform.ReferenceEquals(skeletonTransform, transform.parent);
+#endif
+
+			if (point == null) {
+				if (string.IsNullOrEmpty(pointAttachmentName)) return;
+				UpdateReferences();
+				if (point == null) return;
+			}
+
+			Vector2 worldPos;
+			var bonePose = bone.AppliedPose;
+			point.ComputeWorldPosition(bonePose, out worldPos.x, out worldPos.y);
+			float rotation = point.ComputeWorldRotation(bonePose);
+
+			Transform thisTransform = this.transform;
+			if (skeletonTransformIsParent) {
+				// Recommended setup: Use local transform properties if Spine GameObject is the immediate parent
+				thisTransform.localPosition = new Vector3(worldPos.x, worldPos.y, followSkeletonZPosition ? 0f : thisTransform.localPosition.z);
+				if (followRotation) {
+					float halfRotation = rotation * 0.5f * Mathf.Deg2Rad;
+
+					Quaternion q = default(Quaternion);
+					q.z = Mathf.Sin(halfRotation);
+					q.w = Mathf.Cos(halfRotation);
+					thisTransform.localRotation = q;
+				}
+			} else {
+				// For special cases: Use transform world properties if transform relationship is complicated
+				Vector3 targetWorldPosition = skeletonTransform.TransformPoint(new Vector3(worldPos.x, worldPos.y, 0f));
+				if (!followSkeletonZPosition)
+					targetWorldPosition.z = thisTransform.position.z;
+
+				Transform transformParent = thisTransform.parent;
+				if (transformParent != null) {
+					Matrix4x4 m = transformParent.localToWorldMatrix;
+					if (m.m00 * m.m11 - m.m01 * m.m10 < 0) // Determinant2D is negative
+						rotation = -rotation;
+				}
+
+				if (followRotation) {
+					Vector3 transformWorldRotation = skeletonTransform.rotation.eulerAngles;
+					thisTransform.SetPositionAndRotation(targetWorldPosition, Quaternion.Euler(transformWorldRotation.x, transformWorldRotation.y, transformWorldRotation.z + rotation));
+				} else {
+					thisTransform.position = targetWorldPosition;
+				}
+			}
+
+			if (followSkeletonFlip) {
+				Vector3 localScale = thisTransform.localScale;
+				Skeleton skeleton = skeletonRenderer.Skeleton;
+				localScale.y = Mathf.Abs(localScale.y) * Mathf.Sign(skeleton.ScaleX * skeleton.ScaleY);
+				thisTransform.localScale = localScale;
+			}
+		}
+
+		#region Transfer of Deprecated Fields
+#if UNITY_EDITOR && AUTO_UPGRADE_TO_43_COMPONENTS
+		public virtual void UpgradeTo43 () {
+			wasUpgradedTo43 = true;
+			if (skeletonRenderer == null) {
+				Component previousReference = previousSkeletonRenderer != null ? previousSkeletonRenderer : this;
+				skeletonRenderer = previousReference.GetComponent<SkeletonRenderer>();
+				if (skeletonRenderer == null)
+					Debug.LogError("Please manually re-assign SkeletonRenderer at PointFollower, " +
+						"automatic upgrade failed.", this);
+			}
+		}
+		[SerializeField, HideInInspector, FormerlySerializedAs("skeletonRenderer")] Component previousSkeletonRenderer;
+		[SerializeField] protected bool wasUpgradedTo43 = false;
+#endif
+		#endregion
+	}
 }

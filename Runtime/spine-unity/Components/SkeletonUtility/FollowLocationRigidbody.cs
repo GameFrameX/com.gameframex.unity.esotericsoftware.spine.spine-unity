@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -29,29 +29,26 @@
 
 using UnityEngine;
 
-namespace Spine.Unity
-{
-    /// <summary>
-    /// Utility component to support flipping of hinge chains (chains of HingeJoint objects) along with the parent skeleton.
-    /// 
-    /// Note: This component is automatically attached when calling "Create Hinge Chain" at <see cref="SkeletonUtilityBone"/>.
-    /// </summary>
-    [RequireComponent(typeof(Rigidbody))]
-    [UnityEngine.Scripting.Preserve]
-    public class FollowLocationRigidbody : MonoBehaviour
-    {
-        [UnityEngine.Scripting.Preserve] public Transform reference;
-        Rigidbody ownRigidbody;
+namespace Spine.Unity {
 
-        private void Awake()
-        {
-            ownRigidbody = this.GetComponent<Rigidbody>();
-        }
+	/// <summary>
+	/// Utility component to support flipping of hinge chains (chains of HingeJoint objects) along with the parent skeleton.
+	/// 
+	/// Note: This component is automatically attached when calling "Create Hinge Chain" at <see cref="SkeletonUtilityBone"/>.
+	/// </summary>
+	[RequireComponent(typeof(Rigidbody))]
+	public class FollowLocationRigidbody : MonoBehaviour {
 
-        void FixedUpdate()
-        {
-            ownRigidbody.rotation = reference.rotation;
-            ownRigidbody.position = reference.position;
-        }
-    }
+		public Transform reference;
+		Rigidbody ownRigidbody;
+
+		private void Awake () {
+			ownRigidbody = this.GetComponent<Rigidbody>();
+		}
+
+		void FixedUpdate () {
+			ownRigidbody.rotation = reference.rotation;
+			ownRigidbody.position = reference.position;
+		}
+	}
 }

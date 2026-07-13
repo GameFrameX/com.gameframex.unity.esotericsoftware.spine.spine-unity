@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,26 +27,19 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-namespace Spine.Unity
-{
-    [UnityEngine.Scripting.Preserve]
-    public class DoubleBuffered<T> where T : new()
-    {
-        readonly T a = new T();
-        readonly T b = new T();
-        bool usingA;
+namespace Spine.Unity {
+	public class DoubleBuffered<T> where T : new() {
+		readonly T a = new T();
+		readonly T b = new T();
+		bool usingA;
 
-        [UnityEngine.Scripting.Preserve]
-        public T GetCurrent()
-        {
-            return usingA ? a : b;
-        }
+		public T GetCurrent () {
+			return usingA ? a : b;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public T GetNext()
-        {
-            usingA = !usingA;
-            return usingA ? a : b;
-        }
-    }
+		public T GetNext () {
+			usingA = !usingA;
+			return usingA ? a : b;
+		}
+	}
 }

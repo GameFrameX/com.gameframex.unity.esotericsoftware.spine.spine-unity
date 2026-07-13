@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -29,41 +29,29 @@
 
 using System;
 
-namespace Spine
-{
-    /// <summary>Stores the setup pose values for an Event.</summary>
-    [UnityEngine.Scripting.Preserve]
-    public class EventData
-    {
-        internal string name;
+namespace Spine {
+	/// <summary>Stores the setup pose values for an Event.</summary>
+	public class EventData {
+		internal string name;
+		internal readonly Event setupPose;
 
-        /// <summary>The name of the event, which is unique across all events in the skeleton.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public string Name
-        {
-            get { return name; }
-        }
+		/// <summary>The setup values that are shared by all events with this data.</summary>
+		public Event SetupPose { get { return setupPose; } }
 
-        [UnityEngine.Scripting.Preserve] public int Int { get; set; }
-        [UnityEngine.Scripting.Preserve] public float Float { get; set; }
-        [UnityEngine.Scripting.Preserve] public string @String { get; set; }
+		/// <summary>The name of the event, unique across all events in the skeleton.
+		/// <para>See <see cref="SkeletonData.FindEvent(string)"/>.</para></summary>
+		public string Name { get { return name; } }
 
-        [UnityEngine.Scripting.Preserve] public string AudioPath { get; set; }
-        [UnityEngine.Scripting.Preserve] public float Volume { get; set; }
-        [UnityEngine.Scripting.Preserve] public float Balance { get; set; }
+		/// <summary>Path to an audio file relative to the audio folder as defined in Spine.</summary>
+		public string AudioPath { get; set; }
 
-        [UnityEngine.Scripting.Preserve]
-        public EventData(string name)
-        {
-            if (name == null) throw new ArgumentNullException("name", "name cannot be null.");
-            this.name = name;
-        }
+		public EventData (string name) {
+			setupPose = new Event(-1, this);
+			this.name = name;
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        override
-            public string ToString()
-        {
-            return Name;
-        }
-    }
+		override public string ToString () {
+			return Name;
+		}
+	}
 }

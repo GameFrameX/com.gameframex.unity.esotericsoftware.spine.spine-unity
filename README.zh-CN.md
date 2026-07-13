@@ -49,7 +49,7 @@
        }
      ],
      "dependencies": {
-       "com.gameframex.unity.esotericsoftware.spine.spine-unity": "3.9.0"
+       "com.gameframex.unity.esotericsoftware.spine.spine-unity": "4.3.96"
      }
    }
    ```

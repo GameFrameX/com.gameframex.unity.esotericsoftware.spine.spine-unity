@@ -1,21 +1,21 @@
 {
   "name": "com.gameframex.unity.esotericsoftware.spine.spine-unity",
   "displayName": "Spine-Unity",
-  "description": "This plugin provides the spine-unity runtime core.",
-  "version": "3.9.1",
+  "description": "This plugin provides the spine-unity runtime core for Spine 4.3.",
+  "version": "4.3.96",
   "unity": "2019.4",
   "author": {
     "name": "Blank",
     "email": "alianblank@outlook.com",
     "url": "https://gameframex.doc.alianblank.com"
   },
-  "dependencies": {},
-  "samples": [
-    {
-      "displayName": "Samples",
-      "path": "Samples~"
-    }
-  ],
+  "dependencies": {
+    "com.unity.ugui": "1.0.0",
+    "com.unity.modules.animation": "1.0.0",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.physics2d": "1.0.0",
+    "com.unity.2d.sprite": "1.0.0"
+  },
   "keywords": [
     "spine",
     "spine-unity",

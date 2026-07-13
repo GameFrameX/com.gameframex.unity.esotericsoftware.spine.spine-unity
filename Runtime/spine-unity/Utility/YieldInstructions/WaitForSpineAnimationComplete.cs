@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -27,43 +27,35 @@
  * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-using UnityEngine;
-using System.Collections;
 using Spine;
+using System.Collections;
+using UnityEngine;
 
-namespace Spine.Unity
-{
-    /// <summary>
-    /// Use this as a condition-blocking yield instruction for Unity Coroutines.
-    /// The routine will pause until the AnimationState.TrackEntry fires its Complete event.
-    /// It can be configured to trigger on the End event as well to cover interruption.
-    /// <p/>
-    /// See the <see cref="http://esotericsoftware.com/spine-unity-events">Spine Unity Events documentation page</see>
-    /// and <see cref="http://esotericsoftware.com/spine-api-reference#AnimationStateListener"/>
-    /// for more information on when track events will be triggered.</summary>
-    [UnityEngine.Scripting.Preserve]
-    public class WaitForSpineAnimationComplete : WaitForSpineAnimation, IEnumerator
-    {
-        [UnityEngine.Scripting.Preserve]
-        public WaitForSpineAnimationComplete(Spine.TrackEntry trackEntry, bool includeEndEvent = false) :
-            base(trackEntry,
-                 includeEndEvent ? (AnimationEventTypes.Complete | AnimationEventTypes.End) : AnimationEventTypes.Complete)
-        {
-        }
+namespace Spine.Unity {
+	/// <summary>
+	/// Use this as a condition-blocking yield instruction for Unity Coroutines.
+	/// The routine will pause until the AnimationState.TrackEntry fires its Complete event.
+	/// It can be configured to trigger on the End event as well to cover interruption.
+	/// <p/>
+	/// See the <see cref="http://esotericsoftware.com/spine-unity-events">Spine Unity Events documentation page</see>
+	/// and <see cref="http://esotericsoftware.com/spine-api-reference#AnimationStateListener"/>
+	/// for more information on when track events will be triggered.</summary>
+	public class WaitForSpineAnimationComplete : WaitForSpineAnimation, IEnumerator {
 
-        #region Reuse
+		public WaitForSpineAnimationComplete (Spine.TrackEntry trackEntry, bool includeEndEvent = false) :
+			base(trackEntry,
+				includeEndEvent ? (AnimationEventTypes.Complete | AnimationEventTypes.End) : AnimationEventTypes.Complete) {
+		}
 
-        /// <summary>
-        /// One optimization high-frequency YieldInstruction returns is to cache instances to minimize GC pressure.
-        /// Use NowWaitFor to reuse the same instance of WaitForSpineAnimationComplete.</summary>
-        [UnityEngine.Scripting.Preserve]
-        public WaitForSpineAnimationComplete NowWaitFor(Spine.TrackEntry trackEntry, bool includeEndEvent = false)
-        {
-            SafeSubscribe(trackEntry,
-                          includeEndEvent ? (AnimationEventTypes.Complete | AnimationEventTypes.End) : AnimationEventTypes.Complete);
-            return this;
-        }
-
-        #endregion
-    }
+		#region Reuse
+		/// <summary>
+		/// One optimization high-frequency YieldInstruction returns is to cache instances to minimize GC pressure.
+		/// Use NowWaitFor to reuse the same instance of WaitForSpineAnimationComplete.</summary>
+		public WaitForSpineAnimationComplete NowWaitFor (Spine.TrackEntry trackEntry, bool includeEndEvent = false) {
+			SafeSubscribe(trackEntry,
+				includeEndEvent ? (AnimationEventTypes.Complete | AnimationEventTypes.End) : AnimationEventTypes.Complete);
+			return this;
+		}
+		#endregion
+	}
 }

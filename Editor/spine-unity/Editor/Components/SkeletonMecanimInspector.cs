@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -33,41 +33,70 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Spine.Unity.Editor {
+	using Event = UnityEngine.Event;
+
 	[CustomEditor(typeof(SkeletonMecanim))]
 	[CanEditMultipleObjects]
-	public class SkeletonMecanimInspector : SkeletonRendererInspector {
+	public class SkeletonMecanimInspector : UnityEditor.Editor {
 		public static bool mecanimSettingsFoldout;
+		public static bool enableScenePreview;
 
-		protected SerializedProperty autoReset;
-		protected SerializedProperty useCustomMixMode;
-		protected SerializedProperty layerMixModes;
-		protected SerializedProperty layerBlendModes;
+		protected SerializedProperty updateTiming, autoReset, useCustomMixMode, layerMixModes, threadedAnimation;
 
-		protected override void OnEnable () {
-			base.OnEnable();
+		readonly GUIContent UpdateTimingLabel = new GUIContent("Animation Update",
+			"Whether to update the animation in normal Update (the default), " +
+			"physics step FixedUpdate, or manually via a user call.");
+		readonly GUIContent AutoResetLabel = new GUIContent("Auto Reset",
+			"When set to true, the skeleton state is mixed out to setup-" +
+			"pose when an animation finishes, according to the " +
+			"animation's keyed items.");
+		readonly GUIContent UseCustomMixModeLabel = new GUIContent("Custom MixMode",
+			"When disabled, the recommended MixMode is used according to the layer blend mode. " +
+			"Enable to specify a custom MixMode for each Mecanim layer.");
+		readonly GUIContent ThreadedAnimationLabel = new GUIContent("Use Threading",
+			"When enabled, animations are processed on multiple threads in parallel.");
+
+		protected virtual void OnEnable () {
 			SerializedProperty mecanimTranslator = serializedObject.FindProperty("translator");
+
 			autoReset = mecanimTranslator.FindPropertyRelative("autoReset");
 			useCustomMixMode = mecanimTranslator.FindPropertyRelative("useCustomMixMode");
 			layerMixModes = mecanimTranslator.FindPropertyRelative("layerMixModes");
-			layerBlendModes = mecanimTranslator.FindPropertyRelative("layerBlendModes");
+
+			updateTiming = serializedObject.FindProperty("updateTiming");
+			threadedAnimation = serializedObject.FindProperty("threadedAnimation");
 		}
 
-		protected override void DrawInspectorGUI (bool multi) {
+		override public void OnInspectorGUI () {
+			DrawInspectorGUI();
+			serializedObject.ApplyModifiedProperties();
+		}
+
+		protected virtual void DrawInspectorGUI () {
+			foreach (UnityEngine.Object c in targets) {
+				ISkeletonAnimation component = c as ISkeletonAnimation;
+				if (!component.IsValid) {
+					SpineEditorUtilities.ReinitializeComponent(component);
+				}
+			}
 
 			AddRootMotionComponentIfEnabled();
 
-			base.DrawInspectorGUI(multi);
+			EditorGUILayout.PropertyField(updateTiming, UpdateTimingLabel);
+			EditorGUILayout.Space();
+
+			if (threadedAnimation != null) {
+				EditorGUILayout.LabelField(SpineInspectorUtility.TempContent("Threaded Animation", SpineEditorUtilities.Icons.subMeshRenderer), EditorStyles.boldLabel);
+				EditorGUILayout.PropertyField(threadedAnimation, ThreadedAnimationLabel);
+				EditorGUILayout.Space();
+			}
 
 			using (new SpineInspectorUtility.BoxScope()) {
 				mecanimSettingsFoldout = EditorGUILayout.Foldout(mecanimSettingsFoldout, "Mecanim Translator");
 				if (mecanimSettingsFoldout) {
-					EditorGUILayout.PropertyField(autoReset, new GUIContent("Auto Reset",
-						"When set to true, the skeleton state is mixed out to setup-" +
-						"pose when an animation finishes, according to the " +
-						"animation's keyed items."));
+					EditorGUILayout.PropertyField(autoReset, AutoResetLabel);
 
-					EditorGUILayout.PropertyField(useCustomMixMode, new GUIContent("Custom MixMode",
-						"When disabled, the recommended MixMode is used according to the layer blend mode. Enable to specify a custom MixMode for each Mecanim layer."));
+					EditorGUILayout.PropertyField(useCustomMixMode, UseCustomMixModeLabel);
 
 					if (useCustomMixMode.hasMultipleDifferentValues || useCustomMixMode.boolValue == true) {
 						DrawLayerSettings();
@@ -75,12 +104,24 @@ namespace Spine.Unity.Editor {
 					}
 				}
 			}
+
+			EditorGUI.BeginChangeCheck();
+			enableScenePreview = EditorGUILayout.Toggle(new GUIContent("Scene Preview",
+				"Preview the Animation Clip selected in the Animation window. Lock this SkeletonMecanim Inspector " +
+				"window, open the Animation window and select the Animation Clip. Then in the Animation window " +
+				"scrub through the timeline."),
+				enableScenePreview, GUILayout.MaxWidth(150f));
+			bool wasScenePreviewChanged = EditorGUI.EndChangeCheck();
+			if (enableScenePreview)
+				HandleAnimationPreview();
+			else if (wasScenePreviewChanged) // just disabled, back to setup pose
+				PreviewAnimationInScene(null, 0.0f);
 		}
 
 		protected void AddRootMotionComponentIfEnabled () {
-			foreach (var t in targets) {
-				var component = t as Component;
-				var animator = component.GetComponent<Animator>();
+			foreach (UnityEngine.Object t in targets) {
+				Component component = t as Component;
+				Animator animator = component.GetComponent<Animator>();
 				if (animator != null && animator.applyRootMotion) {
 					if (component.GetComponent<SkeletonMecanimRootMotion>() == null) {
 						component.gameObject.AddComponent<SkeletonMecanimRootMotion>();
@@ -89,17 +130,49 @@ namespace Spine.Unity.Editor {
 			}
 		}
 
+		protected void HandleAnimationPreview () {
+			UnityEngine.Object animationWindow = AnimationWindowPreview.GetOpenAnimationWindow();
+
+			AnimationClip selectedClip = null;
+			if (animationWindow != null) {
+				selectedClip = AnimationWindowPreview.GetAnimationClip(animationWindow);
+			}
+
+			if (selectedClip != null) {
+				float time = AnimationWindowPreview.GetAnimationTime(animationWindow);
+				PreviewAnimationInScene(selectedClip, time);
+			} else // back to setup pose
+				PreviewAnimationInScene(null, 0.0f);
+		}
+
+		protected void PreviewAnimationInScene (AnimationClip clip, float time) {
+			foreach (UnityEngine.Object c in targets) {
+				SkeletonRenderer skeletonRenderer = ((SkeletonMecanim)c).Renderer as SkeletonRenderer;
+				if (skeletonRenderer == null) continue;
+				Skeleton skeleton = skeletonRenderer.Skeleton;
+				SkeletonData skeletonData = skeleton.Data;
+
+				skeleton.SetupPose();
+				if (clip != null) {
+					Spine.Animation animation = skeletonData.FindAnimation(clip.name);
+					animation.Apply(skeleton, 0, time, false, null, 1.0f, MixFrom.Setup, false, false, false);
+				}
+				skeletonRenderer.LateUpdate();
+			}
+			SceneView.RepaintAll();
+		}
+
 		protected void DrawLayerSettings () {
 			string[] layerNames = GetLayerNames();
 			float widthLayerColumn = 140;
 			float widthMixColumn = 84;
 
 			using (new GUILayout.HorizontalScope()) {
-				var rect = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth, EditorGUIUtility.singleLineHeight);
+				Rect rect = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth, EditorGUIUtility.singleLineHeight);
 				rect.width = widthLayerColumn;
 				EditorGUI.LabelField(rect, SpineInspectorUtility.TempContent("Mecanim Layer"), EditorStyles.boldLabel);
 
-				var savedIndent = EditorGUI.indentLevel;
+				int savedIndent = EditorGUI.indentLevel;
 				EditorGUI.indentLevel = 0;
 
 				rect.position += new Vector2(rect.width, 0);
@@ -115,14 +188,14 @@ namespace Spine.Unity.Editor {
 					using (new GUILayout.HorizontalScope()) {
 						string layerName = i < layerNames.Length ? layerNames[i] : ("Layer " + i);
 
-						var rect = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth, EditorGUIUtility.singleLineHeight);
+						Rect rect = GUILayoutUtility.GetRect(EditorGUIUtility.currentViewWidth, EditorGUIUtility.singleLineHeight);
 						rect.width = widthLayerColumn;
 						EditorGUI.PrefixLabel(rect, SpineInspectorUtility.TempContent(layerName));
 
-						var savedIndent = EditorGUI.indentLevel;
+						int savedIndent = EditorGUI.indentLevel;
 						EditorGUI.indentLevel = 0;
 
-						var mixMode = layerMixModes.GetArrayElementAtIndex(i);
+						SerializedProperty mixMode = layerMixModes.GetArrayElementAtIndex(i);
 						rect.position += new Vector2(rect.width, 0);
 						rect.width = widthMixColumn;
 						EditorGUI.PropertyField(rect, mixMode, GUIContent.none);
@@ -137,7 +210,18 @@ namespace Spine.Unity.Editor {
 			int maxLayerCount = 0;
 			int maxIndex = 0;
 			for (int i = 0; i < targets.Length; ++i) {
-				var skeletonMecanim = ((SkeletonMecanim)targets[i]);
+				SkeletonMecanim skeletonMecanim = ((SkeletonMecanim)targets[i]);
+
+				Animator animator = skeletonMecanim.Translator.Animator;
+				if (!Application.isPlaying) {
+					if (animator != null && animator.isInitialized &&
+						animator.isActiveAndEnabled && animator.runtimeAnimatorController != null) {
+						// Note: Rebind is required to prevent warning "Animator is not playing an AnimatorController"
+						// when saving and perhaps also with prefabs.
+						animator.Rebind();
+					}
+				}
+
 				int count = skeletonMecanim.Translator.MecanimLayerCount;
 				if (count > maxLayerCount) {
 					maxLayerCount = count;
@@ -146,7 +230,7 @@ namespace Spine.Unity.Editor {
 			}
 			if (maxLayerCount == 0)
 				return new string[0];
-			var skeletonMecanimMaxLayers = ((SkeletonMecanim)targets[maxIndex]);
+			SkeletonMecanim skeletonMecanimMaxLayers = ((SkeletonMecanim)targets[maxIndex]);
 			return skeletonMecanimMaxLayers.Translator.MecanimLayerNames;
 		}
 	}

@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -29,114 +29,40 @@
 
 using System;
 
-namespace Spine
-{
-    [UnityEngine.Scripting.Preserve]
-    public class PathConstraintData : ConstraintData
-    {
-        internal ExposedList<BoneData> bones = new ExposedList<BoneData>();
-        internal SlotData target;
-        internal PositionMode positionMode;
-        internal SpacingMode spacingMode;
-        internal RotateMode rotateMode;
-        internal float offsetRotation;
-        internal float position, spacing, rotateMix, translateMix;
+namespace Spine {
+	public class PathConstraintData : ConstraintData<PathConstraint, PathConstraintPose> {
+		internal ExposedList<BoneData> bones = new ExposedList<BoneData>();
+		internal SlotData slot;
+		internal PositionMode positionMode;
+		internal SpacingMode spacingMode;
+		internal RotateMode rotateMode;
+		internal float offsetRotation;
 
-        [UnityEngine.Scripting.Preserve]
-        public PathConstraintData(string name) : base(name)
-        {
-        }
+		public PathConstraintData (string name)
+			: base(name, new PathConstraintPose()) {
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public ExposedList<BoneData> Bones
-        {
-            get { return bones; }
-        }
+		override public IConstraint Create (Skeleton skeleton) {
+			return new PathConstraint(this, skeleton);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public SlotData Target
-        {
-            get { return target; }
-            set { target = value; }
-        }
+		public ExposedList<BoneData> Bones { get { return bones; } }
+		public SlotData Slot { get { return slot; } set { slot = value; } }
+		public PositionMode PositionMode { get { return positionMode; } set { positionMode = value; } }
+		public SpacingMode SpacingMode { get { return spacingMode; } set { spacingMode = value; } }
+		public RotateMode RotateMode { get { return rotateMode; } set { rotateMode = value; } }
+		public float OffsetRotation { get { return offsetRotation; } set { offsetRotation = value; } }
+	}
 
-        [UnityEngine.Scripting.Preserve]
-        public PositionMode PositionMode
-        {
-            get { return positionMode; }
-            set { positionMode = value; }
-        }
+	public enum PositionMode {
+		Fixed, Percent
+	}
 
-        [UnityEngine.Scripting.Preserve]
-        public SpacingMode SpacingMode
-        {
-            get { return spacingMode; }
-            set { spacingMode = value; }
-        }
+	public enum SpacingMode {
+		Length, Fixed, Percent, Proportional
+	}
 
-        [UnityEngine.Scripting.Preserve]
-        public RotateMode RotateMode
-        {
-            get { return rotateMode; }
-            set { rotateMode = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float OffsetRotation
-        {
-            get { return offsetRotation; }
-            set { offsetRotation = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float Position
-        {
-            get { return position; }
-            set { position = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float Spacing
-        {
-            get { return spacing; }
-            set { spacing = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float RotateMix
-        {
-            get { return rotateMix; }
-            set { rotateMix = value; }
-        }
-
-        [UnityEngine.Scripting.Preserve]
-        public float TranslateMix
-        {
-            get { return translateMix; }
-            set { translateMix = value; }
-        }
-    }
-
-    [UnityEngine.Scripting.Preserve]
-    public enum PositionMode
-    {
-        Fixed,
-        Percent
-    }
-
-    [UnityEngine.Scripting.Preserve]
-    public enum SpacingMode
-    {
-        Length,
-        Fixed,
-        Percent
-    }
-
-    [UnityEngine.Scripting.Preserve]
-    public enum RotateMode
-    {
-        Tangent,
-        Chain,
-        ChainScale
-    }
+	public enum RotateMode {
+		Tangent, Chain, ChainScale
+	}
 }

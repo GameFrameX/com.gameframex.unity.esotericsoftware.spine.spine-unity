@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2026, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -33,34 +33,31 @@
 
 using UnityEngine;
 
-namespace Spine.Unity
-{
+namespace Spine.Unity {
+
 #if NEW_PREFAB_SYSTEM
-    [ExecuteAlways]
+	[ExecuteAlways]
 #else
 	[ExecuteInEditMode]
 #endif
-    [RequireComponent(typeof(SkeletonUtilityBone))]
-    [HelpURL("http://esotericsoftware.com/spine-unity#SkeletonUtilityConstraint")]
-    [UnityEngine.Scripting.Preserve]
-    public abstract class SkeletonUtilityConstraint : MonoBehaviour
-    {
-        protected SkeletonUtilityBone bone;
-        protected SkeletonUtility hierarchy;
+	[RequireComponent(typeof(SkeletonUtilityBone))]
+	[HelpURL("https://esotericsoftware.com/spine-unity-utility-components#SkeletonUtilityConstraint")]
+	public abstract class SkeletonUtilityConstraint : MonoBehaviour {
 
-        protected virtual void OnEnable()
-        {
-            bone = GetComponent<SkeletonUtilityBone>();
-            hierarchy = transform.GetComponentInParent<SkeletonUtility>();
-            hierarchy.RegisterConstraint(this);
-        }
+		protected SkeletonUtilityBone bone;
+		protected SkeletonUtility hierarchy;
 
-        protected virtual void OnDisable()
-        {
-            hierarchy.UnregisterConstraint(this);
-        }
+		protected virtual void OnEnable () {
+			bone = GetComponent<SkeletonUtilityBone>();
+			hierarchy = transform.GetComponentInParent<SkeletonUtility>();
+			hierarchy.RegisterBone(bone); // prevent update order issues
+			hierarchy.RegisterConstraint(this);
+		}
 
-        [UnityEngine.Scripting.Preserve]
-        public abstract void DoUpdate();
-    }
+		protected virtual void OnDisable () {
+			hierarchy.UnregisterConstraint(this);
+		}
+
+		public abstract void DoUpdate ();
+	}
 }
