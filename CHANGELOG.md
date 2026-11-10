@@ -1,3 +1,10 @@
+## [3.9.2](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.9.1...3.9.2) (2026-11-10)
+
+
+### Bug Fixes
+
+* **esotericsoftware.spine.spine-unity:** 添加完整 link.xml 防代码裁剪保护 ([5c174d5](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/commit/5c174d5ebdb8e151383c9fc2e9d41cae230250c1))
+
 ## [3.9.1](https://github.com/gameframex/com.gameframex.unity.esotericsoftware.spine.spine-unity/compare/3.9.0...3.9.1) (2026-06-08)
 
 
